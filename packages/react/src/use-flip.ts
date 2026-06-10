@@ -10,13 +10,9 @@
  */
 
 import { useLayoutEffect, useRef } from "react";
+import { prefersReducedMotion } from "./prefers-reduced-motion";
 
 const FLIP_DURATION = 200;
-
-const prefersReducedMotion = (): boolean =>
-  typeof window !== "undefined" &&
-  typeof window.matchMedia === "function" &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const raf = (cb: () => void): void => {
   if (typeof requestAnimationFrame === "function") {
@@ -57,7 +53,6 @@ export function useFlip(keys: string[]): (key: string) => RegisterRef {
         raf(() => {
           el.style.transition = `transform ${FLIP_DURATION}ms ease`;
           el.style.transform = "";
-          el.dataset.flip = "done";
         });
       }
     });
@@ -66,6 +61,10 @@ export function useFlip(keys: string[]): (key: string) => RegisterRef {
     // `keys` order/length changing is the signal that layout may have shifted.
   }, [keys.join(",")]);
 
+  // A fresh `register`/ref-callback closure is allocated per render. That churn
+  // is intentional and harmless: React detaches the old callback (passing `null`)
+  // and attaches the new one each commit, which simply re-records the same element
+  // under the same key in the persistent `refs` map — no extra measurement or work.
   return (key: string): RegisterRef =>
     (el) => {
       if (el) refs.current.set(key, el);

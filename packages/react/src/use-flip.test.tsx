@@ -53,10 +53,11 @@ describe("FLIP reflow", () => {
 
     const survivor = container.querySelector(".et-toast") as HTMLElement;
     expect(survivor).not.toBeNull();
-    // FLIP either left a transient transform or completed the play and flagged it.
-    expect(
-      survivor.style.transform !== "" || survivor.dataset.flip === "done",
-    ).toBe(true);
+    // FLIP writes a transition to play the inverted delta back to identity — the
+    // observable production effect. (The synchronous rAF shim above clears the
+    // transform back to "" in the same tick, so we assert on the transition the
+    // play phase set rather than the transient transform value.)
+    expect(survivor.style.transition).toContain("transform");
 
     rectSpy.mockRestore();
     rafSpy.mockRestore();
@@ -105,7 +106,9 @@ describe("FLIP reflow", () => {
     });
 
     const survivor = container.querySelector(".et-toast") as HTMLElement;
+    // No FLIP work under reduced motion: neither the inverted transform nor the
+    // play-phase transition is ever written.
     expect(survivor.style.transform).toBe("");
-    expect(survivor.dataset.flip).toBeUndefined();
+    expect(survivor.style.transition).toBe("");
   });
 });
