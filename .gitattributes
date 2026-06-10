@@ -1,0 +1,13 @@
+# Normalize line endings to LF on checkin; check out platform-native.
+# Stops CRLF/LF churn warnings across Windows/macOS/Linux contributors.
+* text=auto eol=lf
+
+# Treat binary assets as binary so Git never tries to normalize them.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
