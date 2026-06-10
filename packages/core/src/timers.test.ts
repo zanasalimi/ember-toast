@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createStore } from "./store";
+import { createStore, DEFAULT_DURATION } from "./store";
 
 describe("store: timers", () => {
   let store: ReturnType<typeof createStore>;
@@ -15,6 +15,17 @@ describe("store: timers", () => {
     store.add({ message: "x", type: "default", duration: 1000 });
     expect(store.getSnapshot()).toHaveLength(1);
     vi.advanceTimersByTime(1000);
+    expect(store.getSnapshot()).toHaveLength(0);
+  });
+
+  it("explicit `duration: undefined` falls back to the default (does not fire immediately)", () => {
+    store.add({ message: "x", type: "default", duration: undefined });
+    // Must NOT auto-dismiss synchronously or on a near-zero timer.
+    vi.advanceTimersByTime(0);
+    expect(store.getSnapshot()).toHaveLength(1);
+    vi.advanceTimersByTime(DEFAULT_DURATION - 1);
+    expect(store.getSnapshot()).toHaveLength(1);
+    vi.advanceTimersByTime(1); // default duration elapses
     expect(store.getSnapshot()).toHaveLength(0);
   });
 

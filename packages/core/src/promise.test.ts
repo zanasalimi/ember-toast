@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { toast } from "./toast";
 import { store } from "./store";
 
@@ -6,6 +6,9 @@ const flush = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
 
 describe("toast.promise", () => {
   beforeEach(() => store.dismiss());
+  // Drain the shared singleton so the settled toast's real-timer setTimeout
+  // (DEFAULT_DURATION) doesn't leak past a test.
+  afterEach(() => store.dismiss());
 
   it("shows loading then success on resolve, same id", async () => {
     const p = Promise.resolve({ name: "file.png" });

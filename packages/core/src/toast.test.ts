@@ -1,9 +1,11 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { toast } from "./toast";
 import { store } from "./store";
 
 describe("toast facade", () => {
   beforeEach(() => store.dismiss());
+  // Drain the shared singleton so no real-timer setTimeout leaks past a test.
+  afterEach(() => store.dismiss());
 
   it("toast(msg) adds a default toast", () => {
     toast("hello");
