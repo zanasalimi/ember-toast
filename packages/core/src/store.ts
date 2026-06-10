@@ -21,7 +21,8 @@ declare function setTimeout(handler: () => void, timeout: number): TimerHandle;
 declare function clearTimeout(handle: TimerHandle): void;
 type TimerHandle = { readonly __timer: unique symbol };
 
-const DEFAULT_DURATION = 4000;
+/** Default auto-dismiss lifetime (ms). The single source of truth — the facade imports it too. */
+export const DEFAULT_DURATION = 4000;
 const DEFAULT_POSITION = "bottom-right" as const;
 
 /** A single shared empty array so the server snapshot is referentially stable across calls. */
@@ -94,15 +95,18 @@ export function createStore(): ToastStoreApi {
     add(opts) {
       const id = opts.id ?? genId();
       const existingIndex = toasts.findIndex((t) => t.id === id);
+      // Resolve each defaulted field AFTER the spread with `??` so an explicit
+      // `undefined` (e.g. `duration: undefined`) can't clobber a default and arm
+      // the timer with `setTimeout(fn, undefined)`, which fires almost immediately.
       const resolved: Toast = {
-        type: "default",
-        duration: DEFAULT_DURATION,
-        position: DEFAULT_POSITION,
-        paused: false,
-        createdAt: Date.now(),
         ...opts,
         id,
         message: opts.message,
+        type: opts.type ?? "default",
+        duration: opts.duration ?? DEFAULT_DURATION,
+        position: opts.position ?? DEFAULT_POSITION,
+        paused: opts.paused ?? false,
+        createdAt: opts.createdAt ?? Date.now(),
       };
 
       if (existingIndex >= 0) {
@@ -112,7 +116,9 @@ export function createStore(): ToastStoreApi {
         toasts.push(resolved);
       }
 
-      // (Re)arm the auto-dismiss timer for the resolved duration.
+      // Unconditionally clear+re-arm: an update-in-place (duplicate id) restarts the
+      // toast's lifetime from the resolved duration — unlike `update`, which only
+      // re-arms when the patch explicitly changes `duration`.
       clear(id);
       arm(id, resolved.duration);
 
@@ -137,6 +143,9 @@ export function createStore(): ToastStoreApi {
 
     dismiss(id) {
       const removed = id ? toasts.filter((t) => t.id === id) : toasts.slice();
+      // No-op if an id was given but matched nothing: skip emit so we don't wake
+      // every subscriber (and trigger a needless React re-render) for nothing.
+      if (id && removed.length === 0) return;
       if (id) {
         clear(id);
         toasts = toasts.filter((t) => t.id !== id);
