@@ -2,11 +2,18 @@
 
 **Call `toast()` from anywhere — an event handler, a utility, a non-React module — and a single mounted `<Toaster/>` renders it.** A headless-first toast primitive for React: a framework-agnostic store with an imperative facade, a promise API that morphs one toast through `loading → success → error` in place, swipe-to-dismiss, FLIP stack reflow, and an accessibility model that announces without ever stealing focus. Zero runtime dependencies. Bring your own markup, or use the styled default.
 
-[![CI](https://img.shields.io/badge/CI-pending-555)](#) [![npm](https://img.shields.io/badge/npm-pending-555)](#) [![bundle size](https://img.shields.io/badge/min%2Bgzip-%3C5kB%20target-555)](#) [![types](https://img.shields.io/badge/types-included-3178c6)](#) [![license](https://img.shields.io/badge/license-MIT-blue)](#)
+[![npm version](https://img.shields.io/npm/v/@embertoast/react?color=E8590C&label=%40embertoast%2Freact)](https://www.npmjs.com/package/@embertoast/react)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@embertoast/react?label=min%2Bgzip)](https://bundlephobia.com/package/@embertoast/react)
+[![CI](https://img.shields.io/github/actions/workflow/status/zanasalimi/embertoast/ci.yml?branch=main&label=CI)](https://github.com/zanasalimi/embertoast/actions/workflows/ci.yml)
+[![types](https://img.shields.io/npm/types/@embertoast/react)](https://www.npmjs.com/package/@embertoast/react)
+[![license](https://img.shields.io/npm/l/@embertoast/react?color=blue)](LICENSE)
 
-> Hero media lands here: the playground firing a stack of toasts, a promise toast morphing, and the FLIP slide as one is dismissed. See [`docs/media/`](docs/media/).
+<!-- HERO MEDIA — placeholder. Drop docs/media/hero.gif in to replace; see docs/media/README.md. -->
+<p align="center">
+  <img src="docs/media/hero.gif" alt="The embertoast playground firing a stack of success, error, and info toasts, one auto-dismissing as the others slide into place" width="900">
+</p>
 
-[Live playground](#) · [Docs](#) · [30-second tour](#)
+[Live playground](https://embertoast.dev) · [Docs](#docs--playground) · [30-second tour](docs/media/walkthrough.mp4)
 
 ---
 
@@ -76,6 +83,7 @@ Full write-up in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 - **Framework-agnostic store over a React-coupled hook** — the producer (`toast()`) is decoupled from the renderer (`<Toaster/>`), so the API works in any module and a Vue/vanilla adapter is *possible* without rewriting the core.
 - **`useSyncExternalStore` over context** — concurrent-safe subscription to the external store with no extra dependency and no provider to thread through the tree.
 - **CSS transitions + FLIP over an animation library** — zero added bytes, 60fps reflow, and FLIP solves the "toasts above a removed one must slide" problem that drops most clones.
+- **Synchronous store, leave animation in a React presence layer** — `dismiss` removes the toast immediately so the store never lies; a `usePresence` layer keeps the removed element mounted just long enough to play its exit (on `animationend`, with a timeout fallback, instant under reduced motion). Animation timing stays out of the framework-free core.
 - **Zero runtime dependencies, CSS not CSS-in-JS** — `sideEffects` configured for tree-shaking, enforced by `size-limit` in CI with a public number on the badge.
 - **Dual ESM + CJS via tsup, types emitted** — one build, both module systems, `.d.ts` included, so the package drops cleanly into any toolchain.
 
@@ -118,7 +126,21 @@ function App() {
 }
 ```
 
-## Run the docs / playground locally
+## Docs & playground
+
+The docs site **is** a live playground: it dogfoods `@embertoast/react`, mounts a real `<Toaster/>`, and fires real toasts from controls that change `position`, `theme`, `richColors`, `closeButton`, and `visibleToasts` on the fly — including a `toast.promise` demo for both the resolve and reject branches. Editorial single-page showcase, not a docs maze.
+
+<!-- The following embeds are placeholders — drop the real captures into docs/media/. -->
+| | |
+|---|---|
+| ![FLIP reflow: dismiss one toast from a stack and the survivors slide up](docs/media/flip-reflow.gif) | ![A promise toast morphing from loading to success in place](docs/media/promise-morph.gif) |
+| **FLIP reflow** — survivors slide into the freed space. | **Promise morph** — one toast, loading → success, in place. |
+| ![Swipe-to-dismiss: drag a toast past the threshold to fling it out](docs/media/swipe-out.gif) | [▶ 30-second walkthrough](docs/media/walkthrough.mp4) |
+| **Swipe-to-dismiss** — past threshold flings out, under snaps back. | **Walkthrough** — the full tour (~75s). |
+
+> The clips above are placeholder paths until the screen recordings are dropped in. Capture instructions and the exact filenames live in [`docs/media/README.md`](docs/media/README.md).
+
+### Run it locally
 
 `docker compose up` covers the **docs site and live playground** — the showcase — so it runs identically on any machine. The library itself you just `npm i`.
 
