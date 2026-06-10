@@ -26,7 +26,7 @@ Status: accepted · 2026-01
 
 **Decision.** Keep toast state in a module-level, framework-free pub/sub store. React subscribes with `useSyncExternalStore`; `<Toaster/>` is purely a subscriber.
 
-**Consequences.** + `toast()` is a plain function callable anywhere. + Concurrent-safe, tearing-free subscription with no extra dependency. + The store carries no React, so non-React adapters become possible. − A module singleton is global state; tests must reset it (the store exposes `reset()` and `createToastStore()` for isolation). − SSR needs a `getServerSnapshot` that returns empty so server and first client paint agree.
+**Consequences.** + `toast()` is a plain function callable anywhere. + Concurrent-safe, tearing-free subscription with no extra dependency. + The store carries no React, so non-React adapters become possible. − A module singleton is global state; tests reset it with `store.dismiss()` and use the exported `createStore()` factory for fully isolated instances. − SSR needs a `getServerSnapshot` that returns a stable empty array so server and first client paint agree.
 
 **Alternatives rejected.** *React context + reducer* (couples the producer to render; can't fire from outside React; provider threading). *A custom `useState` + event emitter* (reinvents `useSyncExternalStore` and risks tearing under concurrent React).
 
@@ -113,3 +113,17 @@ Status: accepted · 2026-01
 **Consequences.** + The core/react boundary is enforced by package boundaries, not discipline. + turbo caches and parallelizes the task graph; the docs app builds against local packages. − More moving parts than a single package (workspace protocol, build ordering, `transpilePackages` in docs). − Publishing must build packages in dependency order before `changeset publish`.
 
 **Alternatives rejected.** *Single package with subpath exports* (simpler to publish, but the core/react split becomes a convention instead of a boundary, and adapters get harder). *npm/yarn workspaces* (fine, but pnpm's strictness and disk model suit a zero-dep, size-conscious library better).
+
+---
+
+## ADR-009: Leave animation via a React presence layer, store removes synchronously
+
+Status: accepted · 2026-01
+
+**Context.** A dismissed toast should animate out, not vanish. The obvious implementation is to give the store an `exiting` flag and a deferred `remove(id)`: `dismiss` flips the flag, the renderer plays the exit, then calls `remove`. But that pushes animation timing — `animationend`, `prefers-reduced-motion`, a fallback timer — into the framework-free core, and it makes the store's snapshot lie (a dismissed toast lingers in state for the animation's duration).
+
+**Decision.** Keep the store a clean, synchronous source of truth: `dismiss(id)` removes the toast immediately and the snapshot reflects exactly what is live. Implement the leave animation as a thin React **presence layer** (`use-presence.ts`) layered over the live snapshot in `<Toaster/>`. `usePresence` diffs the live list against the previous render, holds any id that just left in an `exiting` map, re-appends it to the rendered set (so FLIP survivors keep their slots), and retires it when `<ToastItem/>` reports `animationend` — backed by a timeout fallback so a `display:none`/backgrounded-tab case can never strand a ghost. A re-added id cancels its in-flight exit. Under `prefers-reduced-motion` there is no exit phase at all.
+
+**Consequences.** + The core stays animation-agnostic and the snapshot never lies — `exiting` is a render state, not store state, which is where it belongs. + The fallback timer makes the exit robust against missing animation events. + The same presence set FLIP observes keeps reflow and exit from fighting. − The renderer holds a small amount of transient state (the `exiting` map) on top of the store, so "the renderer is purely a subscriber" carries an asterisk: it subscribes, plus it owns the exit-in-progress set. − Two clocks to reason about (the store timer and the presence fallback), which the fallback duration must be tuned against (`> --et-exit-duration`).
+
+**Alternatives rejected.** *Store-owned `exiting` + `store.remove`* (leaks animation/DOM/motion-preference concerns into the framework-free core and makes the snapshot stale; rejected as a layering violation). *Hard-cut removal, no exit animation* (simplest, but the dismiss feels broken and the swipe-out has nothing to animate to). *A third-party presence library (e.g. framer-motion's `AnimatePresence`)* (solves it, but reintroduces the dependency ADR-004 exists to avoid).

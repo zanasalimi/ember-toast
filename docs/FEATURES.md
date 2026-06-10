@@ -6,6 +6,8 @@ Tier legend: **MVP** = in the first published release · **v1** = a later 1.x mi
 
 States vocabulary used throughout: `idle` (no toasts), `entering`, `visible`, `paused`, `exiting`, `queued`, `removed`.
 
+> A note on where state lives. The framework-free **store** holds only what is truly live: a toast is either in the snapshot or it isn't. `dismiss` removes it **synchronously** — there is no `exiting` flag or deferred `remove` in the store. `entering`, `exiting`, and `queued` are **renderer** concepts: the React `<Toaster/>` plays the enter animation on mount, and a `usePresence` layer keeps a just-removed toast mounted briefly (`exiting`) to play its leave animation before unmounting (instant under reduced motion). `queued` is the overflow beyond `visibleToasts`, which the renderer simply doesn't mount yet. The vocabulary below describes observable behavior; only `visible`/`paused`/`removed` are store-level facts.
+
 ---
 
 ## 1. Imperative API
@@ -56,12 +58,12 @@ States vocabulary used throughout: `idle` (no toasts), `entering`, `visible`, `p
 ## 3. Control & Update
 
 ### 3.1 `toast.dismiss(id)` — **MVP**
-- Begins the exit animation for one toast, then removes it; fires `onDismiss`.
-- **Edge cases:** unknown id → no-op (no throw). Called on an already-`exiting` toast → ignored.
+- Removes one toast from the store synchronously and fires its `onDismiss`. The store snapshot no longer contains it on the next emit. The React presence layer then plays the leave animation on the now-orphaned element before unmounting it (instant under reduced motion) — the *store* removal is immediate; the *visual* exit is a renderer concern.
+- **Edge cases:** unknown id → no-op, and the store skips the emit so no subscriber re-renders for nothing. Dismissing an id that's already mid-exit (a presence ghost) is a no-op in the store; the ghost finishes its animation and retires on schedule.
 
 ### 3.2 `toast.dismiss()` (all) — **MVP**
-- Dismisses every visible and queued toast.
-- **Acceptance:** after the exit transitions, the store is `idle`.
+- Removes every toast from the store (visible and queued) synchronously, firing each `onDismiss`.
+- **Acceptance:** the store is `idle` immediately after the call; the renderer then animates the previously-visible toasts out (instant under reduced motion).
 
 ### 3.3 `toast.update(id, patch)` — **MVP**
 - Patches content, type, duration, action, className, etc. on an existing toast in place.
@@ -145,8 +147,9 @@ States vocabulary used throughout: `idle` (no toasts), `entering`, `visible`, `p
 ## 7. Animation / FLIP
 
 ### 7.1 Enter / exit transitions — **MVP**
-- Enter: translate + fade in from the anchor edge. Exit: collapse height + fade out.
-- CSS transitions only; durations are theme tokens.
+- Enter: translate + fade in, played by a CSS animation on mount. Exit: fade + translate out, played by the `et-exit` class the presence layer applies after the store has already dropped the toast.
+- CSS animations only; durations are theme tokens (`--et-enter-duration`, `--et-exit-duration`).
+- **How exit works:** because the store removes synchronously, the element would otherwise be hard-cut. `usePresence` keeps the removed toast mounted with `exiting: true`, `<ToastItem/>` adds `et-exit`, and the element is dropped on `animationend` — with a timeout fallback so it can never get stuck as a ghost. Disabled (instant) under reduced motion.
 
 ### 7.2 FLIP stack reflow — **MVP**
 - When a toast is removed from the middle/top of a stack, survivors **slide** into the freed space instead of jumping.

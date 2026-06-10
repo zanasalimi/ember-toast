@@ -13,6 +13,7 @@ flowchart TB
     subgraph React["@embertoast/react"]
         Hook["useToasts<br/>useSyncExternalStore"]
         Toaster["&lt;Toaster/&gt;<br/>positions · stacking · FLIP reflow · live region"]
+        Presence["usePresence<br/>keeps a dismissed toast mounted for its leave animation"]
         Item["&lt;ToastItem/&gt;<br/>swipe · timer · a11y · enter/exit anim"]
     end
     subgraph Consumer["Consumer app"]
@@ -24,7 +25,8 @@ flowchart TB
     API --> Store
     Store --> Hook
     Hook --> Toaster
-    Toaster --> Item
+    Toaster --> Presence
+    Presence --> Item
     Mount --> Toaster
 ```
 
@@ -45,22 +47,43 @@ Consequences:
 
 | Module | Package | Responsibility |
 |---|---|---|
-| `store.ts` | core | The pub/sub: id allocation, the visible/queued split at `maxVisible`, per-toast timers with elapsed tracking, pause/resume, two-phase dismiss. The only stateful thing. |
+| `store.ts` | core | The pub/sub: id allocation, per-toast timers with elapsed tracking, pause/resume, and a **synchronous** add/update/dismiss. `dismiss` removes the toast from the snapshot immediately — there is no `exiting` flag and no deferred `remove` in the store; the store is a clean source of truth. The only stateful thing. |
 | `toast.ts` | core | The `toast()` facade and its methods. Thin — it translates a call into a `store.add/update/dismiss`. `promise()` is the one method with real logic (lifecycle orchestration). |
-| `types.ts` | core | The public type surface. `ToastOptions`, `Toast`, `Position`, `ToastState`, `ToasterConfig`. |
+| `types.ts` | core | The public type surface. `ToastOptions`, `Toast`, `Position`, `ToastType`, `PromiseMessages`, the `ToastStoreApi` contract. |
 | `use-toasts.ts` | react | `useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)`. The whole React↔store bridge in one hook. |
-| `Toaster.tsx` | react | The single subscriber. Owns the positioned container, the `aria-live` region, config push, and FLIP reflow across the list. |
-| `ToastItem.tsx` | react | One toast: its countdown, pointer-drag swipe, enter/exit phase animation, and accessible role. |
+| `use-presence.ts` | react | The leave-animation **presence layer**. The store drops a toast synchronously; this hook keeps a just-removed toast mounted briefly (`exiting: true`) so it can play its exit animation, then retires it. Removal is driven by an `animationend` event with a timeout fallback, and is instant under `prefers-reduced-motion`. This is where "exiting" lives — in React, not the store. |
+| `Toaster.tsx` | react | The single subscriber. Owns the positioned container, the `aria-live` region, config push, and FLIP reflow across the list. Wraps the live snapshot in `usePresence` so a dismissed toast animates out instead of being hard-cut. |
+| `ToastItem.tsx` | react | One toast: its countdown, pointer-drag swipe, accessible role, and — when the presence layer marks it `exiting` — the `et-exit` class plus the `animationend` report that retires it. |
 | `styles.css` | react | The styled default, entirely CSS custom properties. Opt-in; headless users skip it. |
 
 ## How a toast moves through the system
 
 1. Code calls `toast.success("Saved", opts)`.
-2. The facade calls `store.add(content, "success", opts)`. The store allocates an id, resolves options against config and per-type defaults, and decides visible-vs-queued against `maxVisible`. It emits a new immutable `ToastState`.
+2. The facade calls `store.add({ message, type: "success", ...opts })`. The store allocates an id, resolves options against per-type defaults, arms the auto-dismiss timer, and emits a new array reference.
 3. Every subscriber's listener fires. `useToasts` triggers a re-render of `<Toaster/>`.
-4. `<Toaster/>` maps visible toasts to `<ToastItem/>`. A new item mounts in the `entering` phase; CSS plays the enter transition. The live region announces it (politeness by severity).
-5. `<ToastItem/>` starts a timer for `duration`. Hover or window blur calls `store.pause(id)`, which captures `remaining`; leaving calls `store.resume(id)`, which restarts from the remainder.
-6. On expiry, swipe past threshold, click, or `toast.dismiss(id)`, the store marks the toast `exiting` and emits. The item plays its exit transition and collapses its height; **FLIP** moves the survivors so they slide into the freed space instead of jumping. When the transition ends, the renderer calls `store.remove(id)` and a queued toast (if any) promotes into view.
+4. `<Toaster/>` trims each position group to `visibleToasts`, then runs that visible set through `usePresence`. A new item mounts; CSS plays the enter animation. The live region announces it (politeness by severity).
+5. `<ToastItem/>` wires pause-on-hover/focus: hover, focus, or window blur calls `store.pause(id)`, which captures `remaining`; leaving calls `store.resume(id)`, which restarts from the remainder.
+6. On expiry, swipe past threshold, click, or `toast.dismiss(id)`, the store removes the toast **synchronously** and emits — the snapshot no longer contains it. The store carries no "exiting" state. The React **presence layer** (`usePresence`) notices the id left the live set and keeps that toast mounted with `exiting: true` for one play of the leave animation; `<ToastItem/>` applies the `et-exit` class and reports `animationend` (a timeout fallback retires it if the event never fires). Meanwhile **FLIP** moves the survivors so they slide into the freed space instead of jumping. Under `prefers-reduced-motion` there is no exit phase — removal is instant. A queued (overflow) toast, if any, promotes into view on the next emit.
+
+## Why the store removes synchronously and the leave animation lives in React
+
+A toast's exit is a *rendering* concern, not a *state* concern. Putting an `exiting` flag in the store (and a deferred `store.remove`) would mean the framework-free core had to know about animation timing — about `animationend`, about `prefers-reduced-motion`, about a fallback timer — none of which belong in a pure pub/sub engine. It would also make the store's snapshot lie: a toast the user dismissed would still be "in" the store for a few hundred milliseconds.
+
+So the store stays honest: `dismiss(id)` removes the toast immediately and the snapshot reflects exactly what is live. The leave animation is then a thin React layer on top:
+
+```mermaid
+flowchart LR
+    Live["store snapshot<br/>(toast removed instantly)"] --> Presence
+    subgraph Presence["usePresence (React)"]
+        direction TB
+        Detect["detect id left the live set"] --> Keep["keep it mounted<br/>exiting: true"]
+        Keep --> Wait["await animationend<br/>(timeout fallback)"]
+        Wait --> Drop["drop the ghost"]
+    end
+    Presence --> Render["&lt;ToastItem class='et-exit'&gt;"]
+```
+
+`usePresence(live)` diffs the live toast list against the previous one. Any id that just disappeared is held in an `exiting` map and re-appended to the rendered set (so survivors keep their FLIP slots), then retired when `<ToastItem/>` fires `onExited` from `animationend` — or when a `400ms` fallback fires, so a backgrounded tab or a `display:none` override can never strand a ghost. A toast re-added with the same id cancels its in-flight exit. Under reduced motion the hook skips the exit phase entirely. This keeps the animation contract in the renderer, where the DOM and the motion preference actually live, and leaves the core a clean source of truth.
 
 ## The promise lifecycle
 
