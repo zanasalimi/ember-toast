@@ -1,0 +1,62 @@
+/**
+ * Styled default for <Toaster/>. Every value is a CSS custom property so consumers
+ * can retheme without overriding selectors. Headless users skip this file entirely.
+ *
+ * Import once: `import "@embertoast/react/styles.css";`
+ *
+ * TODO(M2/M4): full styling lands with the components. The token surface below is
+ * the public theming contract — names are stable; values are placeholders.
+ */
+
+:where([data-embertoast-toaster]) {
+  /* Layout */
+  --et-width: 356px;
+  --et-gap: 14px;
+  --et-offset: 16px;
+  --et-radius: 10px;
+  --et-padding: 14px 16px;
+  --et-z-index: 999999;
+
+  /* Type */
+  --et-font: inherit;
+  --et-font-size: 14px;
+  --et-line-height: 1.4;
+
+  /* Surface (light) */
+  --et-bg: #ffffff;
+  --et-fg: #0a0a0a;
+  --et-border: rgba(10, 10, 10, 0.08);
+  --et-shadow: 0 6px 24px rgba(10, 10, 10, 0.12);
+
+  /* Severity accents — warm ember default for the brand */
+  --et-accent: #e8590c;
+  --et-success: #1f7a3d;
+  --et-error: #c0341d;
+  --et-warning: #b25b00;
+  --et-info: #1f5fb2;
+
+  /* Motion */
+  --et-enter-duration: 320ms;
+  --et-exit-duration: 220ms;
+  --et-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:where([data-embertoast-toaster][data-theme="dark"]) {
+  --et-bg: #161616;
+  --et-fg: #fafafa;
+  --et-border: rgba(255, 255, 255, 0.1);
+  --et-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* No animation when the user asks for none — non-negotiable. */
+@media (prefers-reduced-motion: reduce) {
+  :where([data-embertoast-toaster] *) {
+    --et-enter-duration: 0ms;
+    --et-exit-duration: 0ms;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* TODO(M2): container positioning per data-position, item enter/exit keyframes,
+   swipe transform classes, close button, action button, richColors variants. */

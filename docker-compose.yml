@@ -1,0 +1,5 @@
+# docker-compose.yml
+services:
+  docs:
+    build: { context: ., dockerfile: apps/docs/Dockerfile }
+    ports: ["3000:3000"]

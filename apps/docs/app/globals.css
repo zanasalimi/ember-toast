@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Editorial base layer. The look is carried by typography and spacing rhythm,
+ * not by component chrome. Background is warm paper, ink is near-black, and the
+ * single ember accent is reserved for focal moments (links, the live triggers).
+ */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+  }
+
+  /* Editorial serif display headings. */
+  h1,
+  h2,
+  h3 {
+    @apply font-serif;
+  }
+
+  ::selection {
+    @apply bg-ember-soft text-ink;
+  }
+
+  a {
+    @apply underline-offset-4;
+  }
+
+  /* Visible, deliberate focus ring — accessibility is the product's whole pitch. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ember ring-offset-2 ring-offset-paper;
+  }
+}
+
+/* The library's own styles, dogfooded for the docs' toasts. */
+/* TODO(M6): import "@embertoast/react/styles.css" here once the components ship. */
