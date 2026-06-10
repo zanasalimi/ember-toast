@@ -5,7 +5,14 @@
   "author": "Zana Salimi",
   "license": "MIT",
   "keywords": ["react", "toast", "notification", "headless", "a11y", "sonner"],
-  "sideEffects": ["**/*.css"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zanasalimi/embertoast.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/zanasalimi/embertoast#readme",
+  "bugs": "https://github.com/zanasalimi/embertoast/issues",
+  "sideEffects": ["*.css"],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -60,7 +67,8 @@
     {
       "name": "react binding (ESM, incl. core, tree-shaken)",
       "path": "dist/index.js",
-      "limit": "5 kB"
+      "gzip": true,
+      "limit": "3.5 kB"
     }
   ]
 }
