@@ -8,16 +8,17 @@
 
 import { useSyncExternalStore } from "react";
 import { store } from "@embertoast/core";
-import type { ToastState } from "@embertoast/core";
+import type { Toast } from "@embertoast/core";
 
 /**
- * Subscribe to the live toast snapshot. Re-renders only when the store emits a
- * new (referentially-distinct) state object.
+ * Subscribe to the live toast list. Re-renders only when the store emits a new
+ * (referentially-distinct) array — the store keeps the snapshot stable between
+ * mutations so this hook never tears or loops.
  *
- * `getServerSnapshot` returns the empty server state so SSR markup matches the
+ * `getServerSnapshot` returns the empty server array so SSR markup matches the
  * first client paint (no hydration mismatch, no toasts rendered on the server).
  */
-export function useToasts(): ToastState {
+export function useToasts(): Toast[] {
   return useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,
