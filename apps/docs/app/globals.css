@@ -42,5 +42,13 @@
   }
 }
 
-/* The library's own styles, dogfooded for the docs' toasts. */
-/* TODO(M6): import "@embertoast/react/styles.css" here once the components ship. */
+/*
+ * Shiki blocks render their own theme; this just frames them. The double-class on
+ * pre keeps tailwind's preflight from clobbering shiki's inline colors.
+ */
+.shiki,
+.shiki span {
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+/* The library's own styles are imported in app/layout.tsx; the docs dogfood it. */

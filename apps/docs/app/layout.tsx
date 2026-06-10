@@ -1,13 +1,40 @@
 import type { Metadata } from "next";
+import { Instrument_Serif, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-// import { Toaster } from "@embertoast/react";
-// import "@embertoast/react/styles.css";
+// The library's own stylesheet, dogfooded for the docs' toasts. The single
+// <Toaster/> lives inside the playground so its live controls drive the props;
+// mounting a second one here would double-subscribe the shared store and render
+// every toast twice.
+import "@embertoast/react/styles.css";
 
-// TODO(M6): load the editorial font pairing via next/font:
-//   Instrument_Serif / Fraunces  → --font-display
-//   Inter (or Geist)             → --font-body
-//   a mono                       → --font-mono
-// Expose them as CSS variables on <html> so tailwind.config picks them up.
+/**
+ * Editorial type pairing, loaded via next/font and exposed as CSS variables the
+ * tailwind config keys off:
+ *   Instrument Serif → --font-display (the display/serif headings)
+ *   Inter            → --font-body    (clean sans body)
+ *   JetBrains Mono   → --font-mono    (code + the eyebrow labels)
+ * Instrument Serif ships a single 400 weight by design — its character is the
+ * point, the opposite of Inter-everywhere.
+ */
+const display = Instrument_Serif({
+  weight: "400",
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const body = Inter({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -33,12 +60,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        {children}
-        {/* The docs dogfood the library for their own notifications. */}
-        {/* TODO(M6): <Toaster position="bottom-right" closeButton /> */}
-      </body>
+    <html
+      lang="en"
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+    >
+      <body>{children}</body>
     </html>
   );
 }
