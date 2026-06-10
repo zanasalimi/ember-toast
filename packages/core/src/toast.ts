@@ -7,7 +7,7 @@
  * a utility module, or any non-React code.
  */
 
-import { store } from "./store";
+import { DEFAULT_DURATION, store } from "./store";
 import type {
   PromiseMessages,
   Toast,
@@ -16,9 +16,6 @@ import type {
   ToastOptions,
   ToastType,
 } from "./types";
-
-/** Default auto-dismiss applied to `success`/`error` when a promise settles. */
-const SETTLE_DURATION = 4000;
 
 /** The callable signature: `toast('msg')` and `toast(<Jsx/>)`. */
 export interface ToastFn {
@@ -85,7 +82,8 @@ export const toast: ToastFn = Object.assign(base, {
       ...options,
     });
 
-    const settleDuration = options?.duration ?? SETTLE_DURATION;
+    // A settled promise toast gets the normal default lifetime (one source of truth).
+    const settleDuration = options?.duration ?? DEFAULT_DURATION;
 
     promise.then(
       (value) => {
