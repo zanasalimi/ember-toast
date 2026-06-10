@@ -6,13 +6,7 @@
  */
 
 export { toast } from "./toast";
-export {
-  store,
-  createToastStore,
-  DEFAULT_CONFIG,
-  DURATION_BY_TYPE,
-} from "./store";
-export type { ToastStore } from "./store";
+export { store, createStore } from "./store";
 
 export type {
   Toast,
@@ -21,11 +15,10 @@ export type {
   ToastOptions,
   ToastAction,
   ToastContent,
-  ToastState,
-  ToasterConfig,
+  ToastStoreApi,
+  PromiseMessages,
   Position,
   AriaLive,
-  PromiseMessages,
   Listener,
   Unsubscribe,
 } from "./types";

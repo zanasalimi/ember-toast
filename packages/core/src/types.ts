@@ -3,6 +3,9 @@
  *
  * The renderer (e.g. `@embertoast/react`) consumes these; consumers of the library
  * import the curated subset re-exported from the binding package.
+ *
+ * The core treats a toast body opaquely (`message: unknown`) so it never depends on
+ * React or the DOM. The renderer narrows it (to `ReactNode`, etc.) at its boundary.
  */
 
 export type ToastId = string;
@@ -16,63 +19,50 @@ export type ToastType =
   | "loading"
   | "custom";
 
-export type Position =
-  | "top-left"
-  | "top-center"
-  | "top-right"
-  | "bottom-left"
-  | "bottom-center"
-  | "bottom-right";
+export type Position = `${"top" | "bottom"}-${"left" | "center" | "right"}`;
 
-export type AriaLive = "polite" | "assertive" | "off";
+export type AriaLive = "polite" | "assertive";
 
 /** A renderable toast body. The core treats this opaquely; the renderer decides what it means. */
 export type ToastContent = unknown;
 
 export interface ToastAction {
   label: string;
-  onClick: (event?: unknown) => void;
+  onClick: () => void;
 }
 
 /** Per-toast options accepted by every facade method. */
 export interface ToastOptions {
   /** Provide to update an existing toast in place instead of creating one. */
   id?: ToastId;
-  /** Milliseconds before auto-dismiss. `Infinity` pins the toast open. Defaults are per-type. */
+  /** Milliseconds before auto-dismiss. `Infinity` pins the toast open. */
   duration?: number;
   position?: Position;
-  /** Whether the toast can be dismissed by user gesture (swipe/click/close). Default `true`. */
+  /** Whether the toast can be dismissed by user gesture (swipe/click/close). */
   dismissible?: boolean;
   action?: ToastAction;
-  cancel?: ToastAction;
   className?: string;
-  /** Override the announcement politeness. Defaults follow severity (error → assertive). */
+  /** Override the announcement politeness. Defaults follow severity. */
   ariaLive?: AriaLive;
   onDismiss?: (id: ToastId) => void;
   onAutoClose?: (id: ToastId) => void;
 }
 
-/** A toast as the renderer sees it — options resolved, timing state materialized. */
-export interface Toast {
+/** A toast as the renderer sees it — options resolved, timing defaults applied. */
+export interface Toast extends ToastOptions {
   id: ToastId;
   type: ToastType;
-  content: ToastContent;
+  /** The renderable body. `unknown` in core; `ReactNode` in the react package. */
+  message: ToastContent;
   createdAt: number;
+  /** Resolved auto-dismiss duration (default applied). `Infinity` = persistent. */
   duration: number;
+  /** Resolved position (default applied). */
   position: Position;
-  dismissible: boolean;
-  ariaLive: AriaLive;
-  action?: ToastAction;
-  cancel?: ToastAction;
-  className?: string;
-  /** Lifecycle phase used by the renderer to drive enter/exit animation. */
-  phase: "entering" | "visible" | "exiting";
-  /** True while a timer is paused (hover / window blur). */
+  /** True while this toast's auto-dismiss timer is paused (hover / window blur). */
   paused: boolean;
-  /** Remaining auto-dismiss time, in ms, captured at the last pause. */
-  remaining: number;
-  onDismiss?: (id: ToastId) => void;
-  onAutoClose?: (id: ToastId) => void;
+  /** Height measured by the renderer for stacking / FLIP. */
+  height?: number;
 }
 
 /** Resolvers for `toast.promise`. Each may be a static value or a function of the settled result. */
@@ -82,26 +72,27 @@ export interface PromiseMessages<T> {
   error: ToastContent | ((error: unknown) => ToastContent);
 }
 
-/** Snapshot the renderer subscribes to. Immutable per emit so `useSyncExternalStore` can diff by reference. */
-export interface ToastState {
-  /** Currently visible toasts, render order resolved (respects stack direction). */
-  toasts: readonly Toast[];
-  /** Toasts waiting behind the max-visible limit. */
-  queued: readonly Toast[];
-}
-
-export type Listener = (state: ToastState) => void;
+/** A snapshot subscriber callback. Receives no arguments — pull state via `getSnapshot`. */
+export type Listener = () => void;
 export type Unsubscribe = () => void;
 
-/** Store-level configuration, set once by the mounted renderer. */
-export interface ToasterConfig {
-  position: Position;
-  /** Maximum toasts rendered at once; the remainder queue. */
-  maxVisible: number;
-  /** `"newest-on-top"` reverses render order. */
-  order: "newest-on-top" | "newest-on-bottom";
-  duration: number;
-  gap: number;
-  pauseOnHover: boolean;
-  pauseOnWindowBlur: boolean;
+/** The framework-agnostic store contract a renderer subscribes to. */
+export interface ToastStoreApi {
+  subscribe(listener: Listener): Unsubscribe;
+  /** Current toast list. Referentially stable between mutations so `useSyncExternalStore` can diff by reference. */
+  getSnapshot(): Toast[];
+  /** Server snapshot for SSR — always the same empty array so markup matches first client paint. */
+  getServerSnapshot(): Toast[];
+  /** Create or, when `opts.id` matches an existing toast, update in place. Returns the id. */
+  add(opts: Partial<Toast> & { message: ToastContent }): ToastId;
+  /** Patch an existing toast in place. Re-arms the auto-dismiss timer if `duration` changes. */
+  update(id: ToastId, patch: Partial<Toast>): void;
+  /** Remove one toast, firing its `onDismiss`. `undefined` clears all. */
+  dismiss(id?: ToastId): void;
+  /** Pause a single toast's auto-dismiss timer, capturing remaining time. */
+  pause(id: ToastId): void;
+  /** Resume a paused timer from its captured remaining time. */
+  resume(id: ToastId): void;
+  /** Record a renderer-measured height for stacking / FLIP. */
+  setHeight(id: ToastId, height: number): void;
 }
