@@ -26,6 +26,18 @@ export type AriaLive = "polite" | "assertive";
 /** A renderable toast body. The core treats this opaquely; the renderer decides what it means. */
 export type ToastContent = unknown;
 
+/**
+ * The static (non-resolver) form of a promise message.
+ *
+ * Spans the same value space as {@link ToastContent} (any renderable body — string,
+ * number, JSX, object, null/undefined) but is deliberately *not* the bare `unknown`.
+ * A union member of `unknown` swallows the whole union, so `ToastContent | ((data: T) => …)`
+ * would collapse to `unknown` and strip the resolver arm — leaving `data` untyped (`any`).
+ * Keeping this arm as `{} | null | undefined` preserves the callable arm so `success`/`error`
+ * resolvers get their parameter contextually typed from the promise.
+ */
+export type StaticToastContent = {} | null | undefined;
+
 export interface ToastAction {
   label: string;
   onClick: () => void;
@@ -65,11 +77,15 @@ export interface Toast extends ToastOptions {
   height?: number;
 }
 
-/** Resolvers for `toast.promise`. Each may be a static value or a function of the settled result. */
+/**
+ * Resolvers for `toast.promise`. Each may be a static value or a function of the settled
+ * result. The static arm is {@link StaticToastContent} (not bare `unknown`) so the resolver
+ * arm survives the union and `data`/`error` infer from the promise — see that type's note.
+ */
 export interface PromiseMessages<T> {
   loading: ToastContent;
-  success: ToastContent | ((data: T) => ToastContent);
-  error: ToastContent | ((error: unknown) => ToastContent);
+  success: StaticToastContent | ((data: T) => ToastContent);
+  error: StaticToastContent | ((error: unknown) => ToastContent);
 }
 
 /** A snapshot subscriber callback. Receives no arguments — pull state via `getSnapshot`. */

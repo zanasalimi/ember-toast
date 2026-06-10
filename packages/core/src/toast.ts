@@ -35,8 +35,16 @@ export interface ToastFn {
    * Attach a single toast to a promise: shows `loading`, then morphs in place to
    * `success`/`error` when it settles. Returns the same promise for chaining and
    * never throws to the caller — rejections route to the `error` branch.
+   *
+   * `T` is inferred solely from `promise`; `NoInfer` keeps the `messages` resolvers
+   * from collapsing inference (the opaque `ToastContent` union would otherwise widen
+   * `data` to `unknown`), so `success(data)` sees the concrete settled type.
    */
-  promise<T>(promise: Promise<T>, messages: PromiseMessages<T>, options?: ToastOptions): Promise<T>;
+  promise<T>(
+    promise: Promise<T>,
+    messages: PromiseMessages<NoInfer<T>>,
+    options?: ToastOptions,
+  ): Promise<T>;
 
   /** Dismiss one toast, or all when `id` is omitted. */
   dismiss(id?: ToastId): void;
@@ -74,7 +82,11 @@ export const toast: ToastFn = Object.assign(base, {
 
   update: (id: ToastId, patch: Partial<Toast>): void => store.update(id, patch),
 
-  promise<T>(promise: Promise<T>, messages: PromiseMessages<T>, options?: ToastOptions): Promise<T> {
+  promise<T>(
+    promise: Promise<T>,
+    messages: PromiseMessages<NoInfer<T>>,
+    options?: ToastOptions,
+  ): Promise<T> {
     const id = store.add({
       message: messages.loading,
       type: "loading",

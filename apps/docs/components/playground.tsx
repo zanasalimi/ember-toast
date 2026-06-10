@@ -67,7 +67,7 @@ export function Playground() {
       run: () =>
         toast.promise(fakeUpload(false), {
           loading: "Uploading report…",
-          success: (r: { name: string }) => `Uploaded ${r.name}`,
+          success: (r) => `Uploaded ${r.name}`,
           error: "Upload failed",
         }),
     },
@@ -76,8 +76,8 @@ export function Playground() {
       run: () =>
         toast.promise(fakeUpload(true), {
           loading: "Uploading report…",
-          success: (r: { name: string }) => `Uploaded ${r.name}`,
-          error: (e: unknown) => `Failed: ${(e as Error).message}`,
+          success: (r) => `Uploaded ${r.name}`,
+          error: (e) => `Failed: ${(e as Error).message}`,
         }),
     },
   ];
