@@ -1,26 +1,27 @@
-import { describe, it, expect } from "vitest";
-import { roleForToast } from "./ToastItem";
+import { describe, it, expect, beforeEach } from "vitest";
+import { render, screen, act, fireEvent } from "@testing-library/react";
+import { toast, store } from "@embertoast/core";
 import type { Toast } from "@embertoast/core";
+import { Toaster } from "./Toaster";
+import { roleForToast } from "./ToastItem";
 
 function fixture(overrides: Partial<Toast>): Toast {
   return {
     id: "t1",
     type: "default",
-    content: "hi",
+    message: "hi",
     createdAt: 0,
     duration: 4000,
     position: "bottom-right",
     dismissible: true,
     ariaLive: "polite",
-    phase: "visible",
     paused: false,
-    remaining: 4000,
     ...overrides,
   };
 }
 
-// This one runs today: the ARIA-role mapping is the accessibility contract and is
-// pure, so it can be asserted before the components are built.
+// The ARIA-role mapping is the accessibility contract and is pure, so it can be
+// asserted directly.
 describe("roleForToast", () => {
   it("uses alert for error and warning (assertive interrupt)", () => {
     expect(roleForToast(fixture({ type: "error" }))).toBe("alert");
@@ -34,13 +35,65 @@ describe("roleForToast", () => {
   });
 });
 
-// TODO(M2): unskip once <Toaster/> renders.
-describe.skip("<Toaster/>", () => {
-  it("renders a single aria-live region and never moves focus on mount", () => {
-    // render <Toaster/>, fire a toast, assert document.activeElement is unchanged
+describe("Toaster", () => {
+  beforeEach(() => {
+    store.dismiss();
   });
 
-  it("limits rendered toasts to maxVisible and queues the overflow", () => {
-    // render with maxVisible=2, fire 3, assert 2 in DOM
+  it("renders a toast message", () => {
+    render(<Toaster />);
+    act(() => {
+      toast.success("Saved");
+    });
+    expect(screen.getByText("Saved")).toBeInTheDocument();
+  });
+
+  it("groups by position into aria-live regions", () => {
+    render(<Toaster />);
+    act(() => {
+      toast("x", { position: "top-left" });
+    });
+    const region = screen.getByText("x").closest("[aria-live]");
+    expect(region).toHaveAttribute("aria-live", "polite");
+    expect(region).toHaveAttribute("data-position", "top-left");
+  });
+
+  it("renders an action button that fires its handler", () => {
+    let clicked = false;
+    render(<Toaster />);
+    act(() => {
+      toast("with action", {
+        action: { label: "Undo", onClick: () => (clicked = true) },
+      });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+    expect(clicked).toBe(true);
+  });
+
+  it("close button dismisses", () => {
+    render(<Toaster closeButton />);
+    act(() => {
+      toast("x");
+    });
+    fireEvent.click(screen.getByLabelText("Close"));
+    expect(screen.queryByText("x")).not.toBeInTheDocument();
+  });
+
+  it("renders a close button when the toast is dismissible even without closeButton prop", () => {
+    render(<Toaster />);
+    act(() => {
+      toast("x", { dismissible: true });
+    });
+    expect(screen.getByLabelText("Close")).toBeInTheDocument();
+  });
+
+  it("limits rendered toasts to visibleToasts per position", () => {
+    const { container } = render(<Toaster visibleToasts={2} />);
+    act(() => {
+      toast("a");
+      toast("b");
+      toast("c");
+    });
+    expect(container.querySelectorAll(".et-toast")).toHaveLength(2);
   });
 });

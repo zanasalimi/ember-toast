@@ -4,8 +4,9 @@
  *
  * Import once: `import "@embertoast/react/styles.css";`
  *
- * TODO(M2/M4): full styling lands with the components. The token surface below is
- * the public theming contract — names are stable; values are placeholders.
+ * The token surface below (`--et-*`) is the public theming contract — names are
+ * stable. Layout is keyed off `data-position`; theme off `data-theme`; severity
+ * tint off `data-type` (+ `data-rich`).
  */
 
 :where([data-embertoast-toaster]) {
@@ -27,6 +28,7 @@
   --et-fg: #0a0a0a;
   --et-border: rgba(10, 10, 10, 0.08);
   --et-shadow: 0 6px 24px rgba(10, 10, 10, 0.12);
+  --et-accent-fg: #ffffff;
 
   /* Severity accents — warm ember default for the brand */
   --et-accent: #e8590c;
@@ -48,15 +50,181 @@
   --et-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
 
-/* No animation when the user asks for none — non-negotiable. */
+/* Follow the OS when theme="system". */
+@media (prefers-color-scheme: dark) {
+  :where([data-embertoast-toaster][data-theme="system"]) {
+    --et-bg: #161616;
+    --et-fg: #fafafa;
+    --et-border: rgba(255, 255, 255, 0.1);
+    --et-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ---- Region: one positioned, fixed live-region per corner ---------------- */
+
+.et-toaster {
+  position: fixed;
+  z-index: var(--et-z-index);
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-gap);
+  width: var(--et-width);
+  max-width: calc(100vw - var(--et-offset) * 2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  box-sizing: border-box;
+  font-family: var(--et-font);
+  font-size: var(--et-font-size);
+  line-height: var(--et-line-height);
+  /* The region must never intercept pointer events between toasts. */
+  pointer-events: none;
+}
+
+.et-toaster > * {
+  pointer-events: auto;
+}
+
+/* Horizontal anchoring */
+.et-toaster[data-position$="-left"] {
+  left: var(--et-offset);
+  align-items: flex-start;
+}
+.et-toaster[data-position$="-center"] {
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+.et-toaster[data-position$="-right"] {
+  right: var(--et-offset);
+  align-items: flex-end;
+}
+
+/* Vertical anchoring — bottom stacks newest nearest the edge. */
+.et-toaster[data-position^="top-"] {
+  top: var(--et-offset);
+  flex-direction: column;
+}
+.et-toaster[data-position^="bottom-"] {
+  bottom: var(--et-offset);
+  flex-direction: column-reverse;
+}
+
+/* ---- Toast --------------------------------------------------------------- */
+
+.et-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--et-padding);
+  border-radius: var(--et-radius);
+  background: var(--et-bg);
+  color: var(--et-fg);
+  border: 1px solid var(--et-border);
+  box-shadow: var(--et-shadow);
+  /* Border-left carries the severity hint without richColors. */
+  border-left: 3px solid var(--et-toast-accent, var(--et-accent));
+  touch-action: pan-y;
+  will-change: transform, opacity;
+  animation: et-enter var(--et-enter-duration) var(--et-ease);
+}
+
+.et-toast[data-type="success"] {
+  --et-toast-accent: var(--et-success);
+}
+.et-toast[data-type="error"] {
+  --et-toast-accent: var(--et-error);
+}
+.et-toast[data-type="warning"] {
+  --et-toast-accent: var(--et-warning);
+}
+.et-toast[data-type="info"] {
+  --et-toast-accent: var(--et-info);
+}
+
+/* richColors: fill the whole surface with the severity color. */
+.et-toaster[data-rich] .et-toast[data-type="success"] {
+  background: var(--et-success);
+  color: var(--et-accent-fg);
+  border-color: transparent;
+}
+.et-toaster[data-rich] .et-toast[data-type="error"] {
+  background: var(--et-error);
+  color: var(--et-accent-fg);
+  border-color: transparent;
+}
+.et-toaster[data-rich] .et-toast[data-type="warning"] {
+  background: var(--et-warning);
+  color: var(--et-accent-fg);
+  border-color: transparent;
+}
+.et-toaster[data-rich] .et-toast[data-type="info"] {
+  background: var(--et-info);
+  color: var(--et-accent-fg);
+  border-color: transparent;
+}
+
+.et-toast__message {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.et-toast__action {
+  flex: 0 0 auto;
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+}
+
+.et-toast__close {
+  flex: 0 0 auto;
+  appearance: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.6;
+  font-size: 16px;
+  line-height: 1;
+}
+.et-toast__close:hover {
+  opacity: 1;
+}
+
+@keyframes et-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* No animation when the user asks for none — non-negotiable. FLIP and swipe
+   transforms are gated in JS; this neutralizes CSS transitions/animations. */
 @media (prefers-reduced-motion: reduce) {
-  :where([data-embertoast-toaster] *) {
+  :where([data-embertoast-toaster] *),
+  .et-toast {
     --et-enter-duration: 0ms;
     --et-exit-duration: 0ms;
     transition: none !important;
     animation: none !important;
   }
 }
-
-/* TODO(M2): container positioning per data-position, item enter/exit keyframes,
-   swipe transform classes, close button, action button, richColors variants. */

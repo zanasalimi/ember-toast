@@ -1,23 +1,23 @@
 /**
- * <ToastItem/> — one toast: its timer, swipe gesture, enter/exit animation, and
- * accessible markup.
+ * <ToastItem/> — one toast: its accessible markup, pause-on-hover wiring, swipe
+ * gesture, and dismiss controls.
  *
- * Owns nothing global. It reads its toast, drives its own auto-dismiss countdown
- * (pausing on hover/blur via the store), handles pointer-drag dismissal, and exposes
- * the right roles. The styled body is the default; `renderToast` on <Toaster/> bypasses it.
+ * Owns nothing global. It reads its toast, pauses/resumes its own auto-dismiss
+ * timer through the store on hover/focus, handles pointer-drag dismissal, and
+ * exposes the right role. The `<li>` ref is forwarded so <Toaster/> can measure
+ * it for FLIP reflow.
  */
 
+import { forwardRef } from "react";
 import type { ReactNode } from "react";
 import type { Toast } from "@embertoast/core";
+import { store } from "@embertoast/core";
+import { useSwipe } from "./use-swipe";
 
 export interface ToastItemProps {
   toast: Toast;
   /** Show the close button (from <Toaster/> closeButton). */
-  closeButton?: boolean;
-  /** Distance in px a pointer drag must travel (or velocity it must reach) to fling-dismiss. */
-  swipeThreshold?: number;
-  /** Headless body override. */
-  renderToast?: (toast: Toast) => ReactNode;
+  closeButton?: boolean | undefined;
 }
 
 /**
@@ -25,18 +25,53 @@ export interface ToastItemProps {
  * everything else is polite (`status`). This is the a11y contract — keep it intact.
  */
 export function roleForToast(toast: Toast): "status" | "alert" {
-  return toast.type === "error" || toast.type === "warning" ? "alert" : "status";
+  return toast.type === "error" || toast.type === "warning"
+    ? "alert"
+    : "status";
 }
 
-/**
- * TODO(M2): enter/exit phase transitions driven by `toast.phase`; height measured
- *           for collapse-on-exit so the stack reflows smoothly.
- * TODO(M3): pointer-event swipe — track dx/velocity, snap back under threshold,
- *           translate + fade out past it, then call store.dismiss(toast.id).
- *           Respect prefers-reduced-motion (no transform animation; instant remove).
- * TODO(M3): hover/focus pauses this toast's timer via store.pause(toast.id).
- */
-export function ToastItem(_props: ToastItemProps): ReactNode {
-  // TODO(M2): implement.
-  return null;
-}
+export const ToastItem = forwardRef<HTMLLIElement, ToastItemProps>(
+  function ToastItem({ toast, closeButton }, ref) {
+    const showClose = closeButton || toast.dismissible;
+    const swipe = useSwipe(() => store.dismiss(toast.id));
+
+    return (
+      <li
+        ref={ref}
+        role={roleForToast(toast)}
+        data-type={toast.type}
+        data-embertoast=""
+        className={`et-toast${toast.className ? ` ${toast.className}` : ""}`}
+        // Pause-on-hover and pause-on-focus both freeze the auto-dismiss timer
+        // with its remaining time captured in the store.
+        onMouseEnter={() => store.pause(toast.id)}
+        onMouseLeave={() => store.resume(toast.id)}
+        onFocus={() => store.pause(toast.id)}
+        onBlur={() => store.resume(toast.id)}
+        {...swipe}
+      >
+        <span className="et-toast__message">{toast.message as ReactNode}</span>
+        {toast.action ? (
+          <button
+            type="button"
+            className="et-toast__action"
+            onClick={toast.action.onClick}
+          >
+            {toast.action.label}
+          </button>
+        ) : null}
+        {showClose ? (
+          <button
+            type="button"
+            aria-label="Close"
+            className="et-toast__close"
+            onClick={() => store.dismiss(toast.id)}
+          >
+            {/* Decorative glyph; the accessible name comes from aria-label. */}
+            <span aria-hidden="true">×</span>
+          </button>
+        ) : null}
+      </li>
+    );
+  },
+);
