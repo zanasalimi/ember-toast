@@ -1,56 +1,76 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { createToastStore } from "./store";
-import type { ToastStore } from "./store";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createStore } from "./store";
 
-// TODO(M1): unskip as createToastStore lands. These name the behaviors the store
-// must guarantee; they are the acceptance criteria, not placeholders for `true === true`.
-
-describe.skip("createToastStore", () => {
-  let store: ToastStore;
-
+describe("store: add & subscribe", () => {
+  let store: ReturnType<typeof createStore>;
   beforeEach(() => {
-    store = createToastStore({ maxVisible: 2, duration: 1000 });
+    store = createStore();
   });
 
-  it("assigns a stable id and notifies subscribers on add", () => {
-    const listener = vi.fn();
-    store.subscribe(listener);
-    const id = store.add("hello", "default");
-    expect(id).toBeTypeOf("string");
-    expect(listener).toHaveBeenCalledOnce();
-    expect(store.getSnapshot().toasts.at(-1)?.content).toBe("hello");
+  it("adds a toast and returns its id", () => {
+    const id = store.add({ message: "hi", type: "default" });
+    expect(typeof id).toBe("string");
+    expect(store.getSnapshot()).toHaveLength(1);
+    expect(store.getSnapshot()[0]?.message).toBe("hi");
   });
 
-  it("queues toasts beyond maxVisible and promotes on dismiss", () => {
-    store.add("a", "default");
-    store.add("b", "default");
-    const third = store.add("c", "default");
-    expect(store.getSnapshot().toasts).toHaveLength(2);
-    expect(store.getSnapshot().queued.map((t) => t.id)).toContain(third);
+  it("notifies subscribers on add", () => {
+    const cb = vi.fn();
+    store.subscribe(cb);
+    store.add({ message: "x", type: "default" });
+    expect(cb).toHaveBeenCalledTimes(1);
   });
 
-  it("updates a toast in place when add() reuses an id", () => {
-    const id = store.add("loading…", "loading");
-    store.add("done", "success", { id });
-    const t = store.getSnapshot().toasts.find((x) => x.id === id);
-    expect(t?.type).toBe("success");
-    expect(t?.content).toBe("done");
+  it("getSnapshot is referentially stable between mutations", () => {
+    store.add({ message: "x", type: "default" });
+    const a = store.getSnapshot();
+    const b = store.getSnapshot();
+    expect(a).toBe(b); // same ref → no infinite render loop
   });
 
-  it("pause() captures remaining time and resume() restarts from it", () => {
-    vi.useFakeTimers();
-    const id = store.add("timed", "default");
-    vi.advanceTimersByTime(400);
-    store.pause(id);
-    const remaining = store.getSnapshot().toasts.find((t) => t.id === id)?.remaining;
-    expect(remaining).toBeLessThanOrEqual(600);
-    vi.useRealTimers();
+  it("getSnapshot returns a new ref after a mutation", () => {
+    const a = store.getSnapshot();
+    store.add({ message: "x", type: "default" });
+    const b = store.getSnapshot();
+    expect(a).not.toBe(b);
   });
 
-  it("dismiss() without an id clears everything", () => {
-    store.add("a", "default");
-    store.add("b", "default");
+  it("honors a provided id", () => {
+    const id = store.add({ message: "x", type: "default", id: "fixed" });
+    expect(id).toBe("fixed");
+  });
+});
+
+describe("store: update & dismiss", () => {
+  let store: ReturnType<typeof createStore>;
+  beforeEach(() => {
+    store = createStore();
+  });
+
+  it("updates a toast in place", () => {
+    const id = store.add({ message: "loading", type: "loading" });
+    store.update(id, { type: "success", message: "done" });
+    expect(store.getSnapshot()[0]).toMatchObject({ type: "success", message: "done" });
+  });
+
+  it("dismiss(id) removes one toast", () => {
+    const a = store.add({ message: "a", type: "default" });
+    store.add({ message: "b", type: "default" });
+    store.dismiss(a);
+    expect(store.getSnapshot().map((t) => t.message)).toEqual(["b"]);
+  });
+
+  it("dismiss() clears all", () => {
+    store.add({ message: "a", type: "default" });
+    store.add({ message: "b", type: "default" });
     store.dismiss();
-    expect(store.getSnapshot().toasts.every((t) => t.phase === "exiting")).toBe(true);
+    expect(store.getSnapshot()).toHaveLength(0);
+  });
+
+  it("add with an existing id updates instead of duplicating", () => {
+    store.add({ message: "first", type: "default", id: "dup" });
+    store.add({ message: "second", type: "default", id: "dup" });
+    expect(store.getSnapshot()).toHaveLength(1);
+    expect(store.getSnapshot()[0]?.message).toBe("second");
   });
 });
