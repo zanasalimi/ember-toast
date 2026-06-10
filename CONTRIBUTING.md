@@ -39,6 +39,8 @@ pnpm docs:dev      # http://localhost:3000
 docker compose up  # same, containerized
 ```
 
+> **Windows note:** building the docs with `next build` under `output: 'standalone'` needs symlink support. On Windows that requires Developer Mode (or running as admin); otherwise the standalone trace step fails. Linux, Docker, and CI are unaffected.
+
 ## Workflow
 
 1. Open an issue first for anything beyond a typo or an obvious bug fix. Scope is intentional — let's agree the change belongs before you build it.

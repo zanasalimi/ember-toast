@@ -26,6 +26,7 @@ Building completely and polishing hard before the first release.
 ## Planned — v1.x
 
 - Action + cancel buttons (`{ action: { label, onClick }, cancel }`), keyboard-reachable without focus theft.
+- `<Toaster toastOptions>` — per-`<Toaster/>` default options (e.g. `duration`, `dismissible`, `className`) applied to every toast it renders. Deferred; not yet a `ToasterProps` field.
 - Rich colors / themes, dark mode, documented theme tokens.
 - Infinite/persistent toasts and programmatic progress.
 - Hover-to-expand a collapsed stack (collapsed → fanned), like sonner.

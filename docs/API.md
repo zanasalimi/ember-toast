@@ -1,11 +1,13 @@
 # API
 
-The complete public surface. Everything here is exported from `@embertoast/react` (and the relevant parts re-exported from `@embertoast/core`).
+The public surface shipped from `@embertoast/react` (with the framework-agnostic parts re-exported from `@embertoast/core`). Lines tagged **Planned** are not in the published surface yet — they are tracked in [`ROADMAP.md`](./ROADMAP.md) and called out where they appear.
 
 ```tsx
 import { toast, Toaster } from "@embertoast/react";
 import "@embertoast/react/styles.css"; // omit for headless
 ```
+
+Everything documented below without a **Planned** tag is exported and verifiable against the built declarations (`packages/react/dist/index.d.ts`).
 
 ---
 
@@ -70,15 +72,15 @@ interface ToastOptions {
   dismissible?: boolean;
   /** Action button (styled default / custom render). */
   action?: { label: string; onClick: () => void };
-  /** Cancel button (v1). */
-  cancel?: { label: string; onClick: () => void };
   className?: string;
   /** Override announcement politeness. Defaults follow severity. */
-  ariaLive?: "polite" | "assertive" | "off";
+  ariaLive?: "polite" | "assertive";
   onDismiss?: (id: string) => void;   // removed by gesture/button/dismiss()
   onAutoClose?: (id: string) => void; // removed because duration elapsed
 }
 ```
+
+> **Planned (v1.x):** a `cancel?: { label: string; onClick: () => void }` button alongside `action`. Not in the shipped `ToastOptions` — see [`ROADMAP.md`](./ROADMAP.md).
 
 ### Per-type duration defaults
 
@@ -101,22 +103,37 @@ Mount once near the app root. The single subscriber that renders the stack.
 
 ```ts
 interface ToasterProps {
-  position?: Position;                       // default "bottom-right"
-  maxVisible?: number;                       // default 3; rest queue
-  duration?: number;                         // default auto-dismiss; per-toast overrides
-  gap?: number;                              // px between stacked toasts
-  pauseOnHover?: boolean;                    // default true
-  pauseOnWindowBlur?: boolean;               // default true
-  expand?: boolean;                          // hover-expand collapsed stack (v1)
-  closeButton?: boolean;                     // per-toast close control (styled default)
-  richColors?: boolean;                      // stronger severity colors (v1)
+  /** Default position for toasts that don't specify one. Default "bottom-right". */
+  position?: Position;
+  /** Render a per-toast dismiss button in the styled default. */
+  closeButton?: boolean;
+  /** Stronger severity-tinted styling in the default theme. */
+  richColors?: boolean;
+  /** Color scheme for the styled default. `'system'` defers to the OS. Default "system". */
   theme?: "light" | "dark" | "system";
-  ariaLive?: "polite" | "assertive" | "off"; // default politeness; per-toast overrides
-  offset?: string | number;                  // distance from the viewport edge
+  /** Max toasts shown per position; the rest queue. Default 3. */
+  visibleToasts?: number;
+  /** Pixel gap between stacked toasts. */
+  gap?: number;
+  /** Offset of the stack from the viewport edge, in px. */
+  offset?: number;
+  /** Expand a collapsed stack on hover. Drives a `data-expand` attribute. Default true. */
+  expand?: boolean;
+  /** Extra class on each region container. */
   className?: string;
-  /** Headless escape hatch: render the body yourself. */
-  renderToast?: (toast: Toast) => ReactNode;
 }
+```
+
+> **Planned:** a `toastOptions` prop (per-`<Toaster/>` default options applied to every toast) is deferred — see [`ROADMAP.md`](./ROADMAP.md). Pause-on-hover and pause-on-window-blur are part of the default dismissal behavior rather than `<Toaster/>` props.
+
+---
+
+## `useToasts`
+
+Subscribe to the live toast list from a custom renderer. Returns `Toast[]` directly.
+
+```ts
+function useToasts(): Toast[];
 ```
 
 ---
@@ -134,42 +151,39 @@ type Position =
   | "top-left" | "top-center" | "top-right"
   | "bottom-left" | "bottom-center" | "bottom-right";
 
-type AriaLive = "polite" | "assertive" | "off";
+type AriaLive = "polite" | "assertive";
 ```
 
-`Toast` (the resolved shape passed to `renderToast`), `ToastState`, and `ToasterConfig` are also exported for headless renderers — see [`packages/core/src/types.ts`](../packages/core/src/types.ts).
+`Toast` (the resolved shape — `ToastOptions` with `id`, `type`, `message`, `createdAt`, and resolved `duration`/`position`) is exported too, along with `ToastAction`, `ToastContent`, and `PromiseMessages<T>`. For the full definitions see [`packages/core/src/types.ts`](../packages/core/src/types.ts).
+
+The react package additionally exports the lower-level pieces a custom renderer may want: `ToastItem` / `ToastItemProps`, `roleForToast`, `useSwipe` / `useFlip`, and the swipe types `SwipeGesture` / `SwipeThreshold` / `SwipeHandlers`.
 
 ---
 
 ## Headless usage
 
-Take over the markup while keeping behavior:
+There is no `renderToast` prop. To take over the markup, build a custom renderer against the store using the real exports — `useToasts` plus `toast`:
 
 ```tsx
-<Toaster
-  renderToast={(t) => (
-    <div className="my-toast" data-type={t.type}>
-      {t.content}
-    </div>
-  )}
-/>
-```
-
-Or build a fully custom renderer against the store:
-
-```tsx
-import { useToasts, toast } from "@embertoast/react";
+import { useToasts, toast, roleForToast } from "@embertoast/react";
 
 function MyToaster() {
-  const { toasts } = useToasts();
+  const toasts = useToasts();
   return (
     <div aria-live="polite">
       {toasts.map((t) => (
-        <div key={t.id} role={t.type === "error" ? "alert" : "status"}>
-          {t.content}
+        <div key={t.id} role={roleForToast(t)}>
+          {t.message as React.ReactNode}
+          {t.dismissible !== false && (
+            <button onClick={() => toast.dismiss(t.id)} aria-label="Dismiss">
+              ×
+            </button>
+          )}
         </div>
       ))}
     </div>
   );
 }
 ```
+
+`toast.message` is the renderable body you passed in (`ReactNode` in the react package). `roleForToast` returns `"alert"` for `error`/`warning` and `"status"` otherwise, matching the styled default's a11y contract.

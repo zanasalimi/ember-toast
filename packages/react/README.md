@@ -20,4 +20,4 @@ function App() {
 }
 ```
 
-`toast()` is a standalone function backed by an external store — call it from anywhere. `<Toaster/>` is the single subscriber that renders. Full API, options, and the accessibility model are in the [repository docs](../../docs/API.md).
+`toast()` is a standalone function backed by an external store — call it from anywhere. `<Toaster/>` is the single subscriber that renders. Full API, options, and the accessibility model are in the [repository docs](https://github.com/zanasalimi/embertoast/blob/main/docs/API.md).
