@@ -1,35 +1,30 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { toast } from "./toast";
+import { store } from "./store";
 
-// TODO(M3): unskip once the facade is wired to a fresh store per test.
+describe("toast facade", () => {
+  beforeEach(() => store.dismiss());
 
-describe.skip("toast facade", () => {
-  it("each variant tags the toast with its type", () => {
-    const cases = ["success", "error", "warning", "info", "loading"] as const;
-    for (const variant of cases) {
-      const id = toast[variant]("msg");
-      expect(id).toBeTypeOf("string");
-    }
+  it("toast(msg) adds a default toast", () => {
+    toast("hello");
+    expect(store.getSnapshot()[0]).toMatchObject({ type: "default", message: "hello" });
   });
 
-  describe("promise", () => {
-    it("morphs one toast id from loading to success on resolve", async () => {
-      const p = Promise.resolve({ name: "report.pdf" });
-      await toast.promise(p, {
-        loading: "Uploading…",
-        success: (r) => `Uploaded ${r.name}`,
-        error: "Failed",
-      });
-      // assert the same id transitioned loading → success without creating a second toast
-    });
+  it("variants set the type", () => {
+    toast.success("ok");
+    toast.error("bad");
+    toast.loading("wait");
+    expect(store.getSnapshot().map((t) => t.type)).toEqual(["success", "error", "loading"]);
+  });
 
-    it("morphs to error on reject and surfaces the error message", async () => {
-      const p = Promise.reject(new Error("boom"));
-      const onError = vi.fn();
-      await toast
-        .promise(p, { loading: "…", success: "ok", error: (e) => (e as Error).message })
-        .catch(onError);
-      expect(onError).toHaveBeenCalled();
-    });
+  it("loading defaults to a persistent toast", () => {
+    toast.loading("wait");
+    expect(store.getSnapshot()[0]?.duration).toBe(Infinity);
+  });
+
+  it("toast.dismiss(id) removes it", () => {
+    const id = toast("x");
+    toast.dismiss(id);
+    expect(store.getSnapshot()).toHaveLength(0);
   });
 });
