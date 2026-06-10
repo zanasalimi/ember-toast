@@ -4,9 +4,12 @@
  * Mounted once near the app root. It reads the store via `useToasts`, groups
  * toasts by resolved position into one `aria-live` region per position, renders
  * up to `visibleToasts` per group, and drives FLIP reflow so survivors slide
- * when a toast above them is removed.
+ * when a toast above them is removed. A `usePresence` layer keeps a just-dismissed
+ * toast mounted briefly to play its leave animation before unmounting (instant
+ * under `prefers-reduced-motion`).
  *
- * Imperative producer, declarative renderer: this component holds no toast state.
+ * Imperative producer, declarative renderer: this component holds no toast state
+ * beyond the transient "still animating out" set owned by `usePresence`.
  */
 
 import type { CSSProperties } from "react";
@@ -14,6 +17,8 @@ import type { Position } from "@embertoast/core";
 import { useToasts } from "./use-toasts";
 import { ToastItem } from "./ToastItem";
 import { useFlip } from "./use-flip";
+import { usePresence } from "./use-presence";
+import type { PresentToast } from "./use-presence";
 
 const POSITIONS: Position[] = [
   "top-left",
@@ -58,7 +63,8 @@ function Region({
   offset,
   className,
   closeButton,
-  toasts,
+  present,
+  onExited,
 }: {
   position: Position;
   theme: "light" | "dark" | "system";
@@ -68,15 +74,21 @@ function Region({
   offset: number | undefined;
   className: string | undefined;
   closeButton: boolean | undefined;
-  toasts: import("@embertoast/core").Toast[];
+  /** The rendered set for this corner: live toasts plus any animating out. */
+  present: PresentToast[];
+  /** Retire a ghost once its leave animation ends. */
+  onExited: (id: string) => void;
 }) {
-  // FLIP must observe the same ordered key set the DOM renders.
-  const register = useFlip(toasts.map((t) => t.id));
+  // FLIP must observe the same ordered key set the DOM renders (ghosts included).
+  const register = useFlip(present.map((p) => p.toast.id));
 
-  // Any error/warning in the group makes the whole region assertive so urgent
-  // toasts interrupt; otherwise it stays polite.
-  const assertive = toasts.some(
-    (t) => t.type === "error" || t.type === "warning",
+  // Any live (non-exiting) error/warning in the group makes the whole region
+  // assertive so urgent toasts interrupt; otherwise it stays polite. Exiting
+  // toasts are on their way out, so they don't influence politeness.
+  const assertive = present.some(
+    (p) =>
+      !p.exiting &&
+      (p.toast.type === "error" || p.toast.type === "warning"),
   );
 
   // CSS custom properties aren't in the typed CSSProperties surface; a record
@@ -99,12 +111,14 @@ function Region({
       aria-atomic="false"
       tabIndex={-1}
     >
-      {toasts.map((toast) => (
+      {present.map(({ toast, exiting }) => (
         <ToastItem
           key={toast.id}
           ref={register(toast.id)}
           toast={toast}
           closeButton={closeButton}
+          exiting={exiting}
+          onExited={() => onExited(toast.id)}
         />
       ))}
     </ol>
@@ -124,12 +138,26 @@ export function Toaster({
 }: ToasterProps) {
   const toasts = useToasts();
 
+  // The set actually on screen: per position, the live toasts trimmed to
+  // `visibleToasts` (the rest queue, unseen). Presence tracks departures from this
+  // visible set, so a toast that merely overflows the queue is never animated out —
+  // only ones that were really showing get a leave animation.
+  const visible = POSITIONS.flatMap((pos) =>
+    toasts
+      .filter((t) => (t.position ?? position) === pos)
+      .slice(0, visibleToasts),
+  );
+
+  // One presence layer across the whole stack. Kept above the per-position render
+  // so a region survives its last toast's exit instead of unmounting mid-animation.
+  const { present, done } = usePresence(visible);
+
   return (
     <>
       {POSITIONS.map((pos) => {
-        const items = toasts
-          .filter((t) => (t.position ?? position) === pos)
-          .slice(0, visibleToasts);
+        const items = present.filter(
+          (p) => (p.toast.position ?? position) === pos,
+        );
         if (items.length === 0) return null;
         return (
           <Region
@@ -142,7 +170,8 @@ export function Toaster({
             offset={offset}
             className={className}
             closeButton={closeButton}
-            toasts={items}
+            present={items}
+            onExited={done}
           />
         );
       })}

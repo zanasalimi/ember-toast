@@ -70,12 +70,19 @@ describe("Toaster", () => {
     expect(clicked).toBe(true);
   });
 
-  it("close button dismisses", () => {
+  it("close button dismisses (plays the leave animation, then unmounts)", () => {
     render(<Toaster closeButton />);
     act(() => {
       toast("x");
     });
     fireEvent.click(screen.getByLabelText("Close"));
+    // Dismiss removes the toast from the store, but the presence layer keeps it
+    // mounted to animate out; it's gone for good once the leave animation ends.
+    const ghost = screen.getByText("x").closest(".et-toast") as HTMLElement;
+    expect(ghost).toHaveClass("et-exit");
+    act(() => {
+      fireEvent.animationEnd(ghost);
+    });
     expect(screen.queryByText("x")).not.toBeInTheDocument();
   });
 

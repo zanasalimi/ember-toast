@@ -217,6 +217,25 @@
   }
 }
 
+/* Leave animation. The presence layer in <Toaster/> keeps a dismissed toast
+   mounted with `.et-exit` for one play of this, then drops it on animationend
+   (with a JS timeout fallback). A ghost is inert — it must not catch clicks. */
+.et-toast.et-exit {
+  animation: et-exit var(--et-exit-duration) var(--et-ease) forwards;
+  pointer-events: none;
+}
+
+@keyframes et-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
 /* No animation when the user asks for none — non-negotiable. FLIP and swipe
    transforms are gated in JS; this neutralizes CSS transitions/animations. */
 @media (prefers-reduced-motion: reduce) {
