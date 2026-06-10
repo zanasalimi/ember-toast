@@ -16,7 +16,7 @@
     "test:e2e": "turbo run test:e2e",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
-    "size": "turbo run size",
+    "size": "turbo run size --filter=./packages/*",
     "clean": "turbo run clean && rimraf node_modules",
     "changeset": "changeset",
     "version-packages": "changeset version",
@@ -29,5 +29,10 @@
     "rimraf": "^6.0.1",
     "turbo": "^2.2.3",
     "typescript": "^5.6.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "human-id@>=4.2.0": "4.1.3"
+    }
   }
 }
