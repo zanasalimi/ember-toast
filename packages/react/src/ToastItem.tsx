@@ -194,7 +194,10 @@ export const ToastItem = forwardRef<HTMLLIElement, ToastItemProps>(
           <StatusIcon type={toast.type} />
         </span>
 
-        <div className="et-toast__content">
+        {/* Keyed by type so a morph (e.g. upload → complete) remounts the content
+            and replays the crossfade instead of snapping. Progress-only updates
+            keep the same key, so the percentage text updates without flicker. */}
+        <div className="et-toast__content" key={toast.type}>
           <div className="et-toast__title">{primary}</div>
           {hasSecondary ? (
             <div className="et-toast__desc">{secondary}</div>
