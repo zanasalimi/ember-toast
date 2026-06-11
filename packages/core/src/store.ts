@@ -23,7 +23,6 @@ type TimerHandle = { readonly __timer: unique symbol };
 
 /** Default auto-dismiss lifetime (ms). The single source of truth — the facade imports it too. */
 export const DEFAULT_DURATION = 4000;
-const DEFAULT_POSITION = "bottom-right" as const;
 
 /** A single shared empty array so the server snapshot is referentially stable across calls. */
 const EMPTY: Toast[] = [];
@@ -104,7 +103,8 @@ export function createStore(): ToastStoreApi {
         message: opts.message,
         type: opts.type ?? "default",
         duration: opts.duration ?? DEFAULT_DURATION,
-        position: opts.position ?? DEFAULT_POSITION,
+        // No position default: leave it undefined so the mounted <Toaster position>
+        // is the effective default. A toast only pins a corner when it sets one.
         paused: opts.paused ?? false,
         createdAt: opts.createdAt ?? Date.now(),
       };

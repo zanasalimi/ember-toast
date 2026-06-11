@@ -83,8 +83,8 @@ export interface Toast extends ToastOptions {
   createdAt: number;
   /** Resolved auto-dismiss duration (default applied). `Infinity` = persistent. */
   duration: number;
-  /** Resolved position (default applied). */
-  position: Position;
+  /** The toast's pinned corner, if it set one. Undefined inherits the mounted `<Toaster position>`. */
+  position?: Position;
   /** True while this toast's auto-dismiss timer is paused (hover / window blur). */
   paused: boolean;
   /** Height measured by the renderer for stacking / FLIP. */
