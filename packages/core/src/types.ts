@@ -63,8 +63,8 @@ export interface ToastOptions {
   actions?: ToastAction[];
   /** Small muted hint line beneath the actions (e.g. "This message will close in 4 seconds. Click to stop."). */
   footer?: ToastContent;
-  /** Determinate progress in [0,1]. Renders a filled bar at the bottom edge (e.g. an upload). Patch it with `toast.update(id, { progress })`. */
-  progress?: number;
+  /** Determinate progress in [0,1]. Renders a filled bar at the bottom edge (e.g. an upload). Patch it with `toast.update(id, { progress })`; set to `undefined` to clear the bar (e.g. on completion). */
+  progress?: number | undefined;
   /** Render the auto-dismiss countdown as a depleting bar at the bottom edge. Ignored when `progress` is set or `duration` is Infinity. */
   timerBar?: boolean;
   className?: string;
