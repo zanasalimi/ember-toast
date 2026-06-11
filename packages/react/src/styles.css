@@ -6,57 +6,96 @@
  *
  * The token surface below (`--et-*`) is the public theming contract — names are
  * stable. Layout is keyed off `data-position`; theme off `data-theme`; severity
- * tint off `data-type` (+ `data-rich`).
+ * color off `data-type`. The card is a precise dark notification surface: status
+ * icon, title + body + timestamp + actions, a close affordance, and a bottom
+ * progress bar (a depleting auto-dismiss countdown, or a determinate upload fill).
  */
 
 :where([data-embertoast-toaster]) {
   /* Layout */
-  --et-width: 356px;
-  --et-gap: 14px;
+  --et-width: 420px;
+  --et-gap: 12px;
   --et-offset: 16px;
-  --et-radius: 10px;
-  --et-padding: 14px 16px;
+  --et-radius: 16px;
+  --et-pad-x: 18px;
+  --et-pad-y: 16px;
   --et-z-index: 999999;
 
-  /* Type */
-  --et-font: inherit;
-  --et-font-size: 14px;
-  --et-line-height: 1.4;
+  /* Type — a clean grotesk; consumers can swap --et-font */
+  --et-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 
-  /* Surface (light) */
-  --et-bg: #ffffff;
-  --et-fg: #0a0a0a;
-  --et-border: rgba(10, 10, 10, 0.08);
-  --et-shadow: 0 6px 24px rgba(10, 10, 10, 0.12);
-  --et-accent-fg: #ffffff;
+  /* Surface (dark — the reference look) */
+  --et-bg: #1a1a1d;
+  --et-bg-highlight: rgba(255, 255, 255, 0.05);
+  --et-border: rgba(255, 255, 255, 0.095);
+  --et-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset,
+    0 18px 44px -20px rgba(0, 0, 0, 0.7), 0 4px 12px -6px rgba(0, 0, 0, 0.55);
 
-  /* Severity accents — warm ember default for the brand */
-  --et-accent: #e8590c;
-  --et-success: #1f7a3d;
-  --et-error: #c0341d;
-  --et-warning: #b25b00;
-  --et-info: #1f5fb2;
+  --et-title: #f4f4f5; /* zinc-100 */
+  --et-body: #a1a1aa; /* zinc-400 */
+  --et-muted: #71717a; /* zinc-500 */
+  --et-faint: #52525b; /* zinc-600 — separators */
+  --et-link: #e4e4e7; /* zinc-200 */
+
+  /* Status colors (icon fill + progress bar) */
+  --et-color-default: #8b8b93;
+  --et-color-success: #2fce6a;
+  --et-color-error: #f0473f;
+  --et-color-warning: #f5a524;
+  --et-color-info: #3b82f6;
+  --et-color-loading: #a1a1aa;
+  --et-icon-glyph: #ffffff;
+
+  /* Buttons (e.g. Undo) */
+  --et-btn-bg: #26262b;
+  --et-btn-bg-hover: #303036;
+  --et-btn-border: rgba(255, 255, 255, 0.12);
+  --et-btn-fg: #fafafa;
 
   /* Motion */
-  --et-enter-duration: 320ms;
-  --et-exit-duration: 220ms;
-  --et-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --et-enter-duration: 380ms;
+  --et-exit-duration: 240ms;
+  --et-ease: cubic-bezier(0.21, 1.02, 0.42, 1);
 }
 
-:where([data-embertoast-toaster][data-theme="dark"]) {
-  --et-bg: #161616;
-  --et-fg: #fafafa;
-  --et-border: rgba(255, 255, 255, 0.1);
-  --et-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+/* Light scheme — adapt the same structure to a light surface. */
+:where([data-embertoast-toaster][data-theme="light"]) {
+  --et-bg: #ffffff;
+  --et-bg-highlight: rgba(10, 10, 10, 0.015);
+  --et-border: rgba(10, 10, 10, 0.1);
+  --et-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6) inset,
+    0 18px 40px -22px rgba(10, 10, 10, 0.3), 0 3px 10px -6px rgba(10, 10, 10, 0.18);
+  --et-title: #18181b;
+  --et-body: #52525b;
+  --et-muted: #71717a;
+  --et-faint: #a1a1aa;
+  --et-link: #27272a;
+  --et-btn-bg: #f4f4f5;
+  --et-btn-bg-hover: #e8e8ea;
+  --et-btn-border: rgba(10, 10, 10, 0.12);
+  --et-btn-fg: #18181b;
 }
 
-/* Follow the OS when theme="system". */
-@media (prefers-color-scheme: dark) {
+/* Follow the OS when theme="system" (defaults to the dark tokens above; only
+   needs an override for light environments). */
+@media (prefers-color-scheme: light) {
   :where([data-embertoast-toaster][data-theme="system"]) {
-    --et-bg: #161616;
-    --et-fg: #fafafa;
-    --et-border: rgba(255, 255, 255, 0.1);
-    --et-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    --et-bg: #ffffff;
+    --et-bg-highlight: rgba(10, 10, 10, 0.015);
+    --et-border: rgba(10, 10, 10, 0.1);
+    --et-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6) inset,
+      0 18px 40px -22px rgba(10, 10, 10, 0.3),
+      0 3px 10px -6px rgba(10, 10, 10, 0.18);
+    --et-title: #18181b;
+    --et-body: #52525b;
+    --et-muted: #71717a;
+    --et-faint: #a1a1aa;
+    --et-link: #27272a;
+    --et-btn-bg: #f4f4f5;
+    --et-btn-bg-hover: #e8e8ea;
+    --et-btn-border: rgba(10, 10, 10, 0.12);
+    --et-btn-fg: #18181b;
   }
 }
 
@@ -75,8 +114,6 @@
   list-style: none;
   box-sizing: border-box;
   font-family: var(--et-font);
-  font-size: var(--et-font-size);
-  line-height: var(--et-line-height);
   /* The region must never intercept pointer events between toasts. */
   pointer-events: none;
 }
@@ -113,79 +150,182 @@
 /* ---- Toast --------------------------------------------------------------- */
 
 .et-toast {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 13px;
+  align-items: start;
   width: 100%;
   box-sizing: border-box;
-  padding: var(--et-padding);
+  padding: var(--et-pad-y) var(--et-pad-x);
   border-radius: var(--et-radius);
   background: var(--et-bg);
-  color: var(--et-fg);
   border: 1px solid var(--et-border);
   box-shadow: var(--et-shadow);
-  /* Border-left carries the severity hint without richColors. */
-  border-left: 3px solid var(--et-toast-accent, var(--et-accent));
+  color: var(--et-body);
+  /* Clip the bottom progress bar to the rounded corners. */
+  overflow: hidden;
   touch-action: pan-y;
   will-change: transform, opacity;
   animation: et-enter var(--et-enter-duration) var(--et-ease);
 }
 
+/* Per-type status color drives the icon fill and the progress bar. */
+.et-toast {
+  --et-toast-color: var(--et-color-default);
+}
 .et-toast[data-type="success"] {
-  --et-toast-accent: var(--et-success);
+  --et-toast-color: var(--et-color-success);
 }
 .et-toast[data-type="error"] {
-  --et-toast-accent: var(--et-error);
+  --et-toast-color: var(--et-color-error);
 }
 .et-toast[data-type="warning"] {
-  --et-toast-accent: var(--et-warning);
+  --et-toast-color: var(--et-color-warning);
 }
 .et-toast[data-type="info"] {
-  --et-toast-accent: var(--et-info);
+  --et-toast-color: var(--et-color-info);
+}
+.et-toast[data-type="loading"] {
+  --et-toast-color: var(--et-color-loading);
 }
 
-/* richColors: fill the whole surface with the severity color. */
-.et-toaster[data-rich] .et-toast[data-type="success"] {
-  background: var(--et-success);
-  color: var(--et-accent-fg);
-  border-color: transparent;
+/* ---- Icon ---------------------------------------------------------------- */
+
+.et-toast__icon {
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  /* Optically align the icon's center to the title's cap height. */
+  margin-top: 1px;
+  color: var(--et-toast-color);
+  flex: none;
 }
-.et-toaster[data-rich] .et-toast[data-type="error"] {
-  background: var(--et-error);
-  color: var(--et-accent-fg);
-  border-color: transparent;
+.et-toast__icon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
-.et-toaster[data-rich] .et-toast[data-type="warning"] {
-  background: var(--et-warning);
-  color: var(--et-accent-fg);
-  border-color: transparent;
-}
-.et-toaster[data-rich] .et-toast[data-type="info"] {
-  background: var(--et-info);
-  color: var(--et-accent-fg);
-  border-color: transparent;
+.et-toast__icon[data-spin] svg {
+  animation: et-spin 0.7s linear infinite;
 }
 
-.et-toast__message {
-  flex: 1 1 auto;
+/* ---- Content column ------------------------------------------------------ */
+
+.et-toast__content {
+  grid-column: 2;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.et-toast__action {
-  flex: 0 0 auto;
+.et-toast__title {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.006em;
+  color: var(--et-title);
+  word-break: break-word;
+}
+
+.et-toast__desc {
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--et-body);
+  word-break: break-word;
+}
+/* When there is a title, the body sits just beneath it. */
+.et-toast__title + .et-toast__desc {
+  margin-top: 3px;
+}
+
+.et-toast__time {
+  margin-top: 10px;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--et-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Actions ------------------------------------------------------------- */
+
+.et-toast__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin-top: 13px;
+}
+
+.et-toast__link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--et-link);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--et-link) 38%, transparent);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.15s ease, color 0.15s ease;
+}
+.et-toast__link:hover {
+  text-decoration-color: var(--et-link);
+}
+/* Middot separator between consecutive links. */
+.et-toast__link + .et-toast__link::before {
+  content: "·";
+  display: inline-block;
+  margin: 0 9px;
+  color: var(--et-faint);
+  text-decoration: none;
+}
+
+.et-toast__btn {
   appearance: none;
   cursor: pointer;
   font: inherit;
-  font-weight: 600;
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid currentColor;
-  background: transparent;
-  color: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--et-btn-fg);
+  background: var(--et-btn-bg);
+  border: 1px solid var(--et-btn-border);
+  border-radius: 8px;
+  padding: 7px 13px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.et-toast__btn:hover {
+  background: var(--et-btn-bg-hover);
 }
 
+.et-toast__footer {
+  margin-top: 12px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--et-muted);
+}
+.et-toast__footer strong,
+.et-toast__footer b {
+  color: var(--et-link);
+  font-weight: 500;
+}
+
+/* ---- Close --------------------------------------------------------------- */
+
 .et-toast__close {
-  flex: 0 0 auto;
+  grid-column: 3;
+  align-self: start;
+  margin-top: 1px;
+  flex: none;
   appearance: none;
   cursor: pointer;
   display: inline-flex;
@@ -195,21 +335,72 @@
   height: 20px;
   padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
-  color: inherit;
-  opacity: 0.6;
-  font-size: 16px;
-  line-height: 1;
+  color: var(--et-muted);
+  transition: color 0.15s ease, background 0.15s ease;
 }
 .et-toast__close:hover {
-  opacity: 1;
+  color: var(--et-title);
+  background: color-mix(in srgb, currentColor 12%, transparent);
 }
+.et-toast__close svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+/* ---- Progress bar -------------------------------------------------------- */
+
+.et-toast__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: transparent;
+}
+.et-toast__progress-fill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  background: var(--et-toast-color);
+  border-radius: 0 2px 0 0;
+}
+/* Determinate (upload): width tracks `progress`, eased for smoothness. */
+.et-toast__progress-fill[data-mode="determinate"] {
+  transition: width 0.22s var(--et-ease);
+}
+/* Countdown: deplete from full to empty over the toast's duration. The inline
+   `--et-duration` and `animation-play-state` (paused on hover) come from JS. */
+.et-toast__progress-fill[data-mode="timer"] {
+  animation: et-deplete var(--et-duration, 4000ms) linear forwards;
+}
+
+@keyframes et-deplete {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes et-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- Enter / leave ------------------------------------------------------- */
 
 @keyframes et-enter {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(10px) scale(0.97);
   }
   to {
     opacity: 1;
@@ -217,9 +408,8 @@
   }
 }
 
-/* Leave animation. The presence layer in <Toaster/> keeps a dismissed toast
-   mounted with `.et-exit` for one play of this, then drops it on animationend
-   (with a JS timeout fallback). A ghost is inert — it must not catch clicks. */
+/* The presence layer keeps a dismissed toast mounted with `.et-exit` for one
+   play of this, then drops it on animationend (with a JS timeout fallback). */
 .et-toast.et-exit {
   animation: et-exit var(--et-exit-duration) var(--et-ease) forwards;
   pointer-events: none;
@@ -232,12 +422,13 @@
   }
   to {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(10px) scale(0.96);
   }
 }
 
 /* No animation when the user asks for none — non-negotiable. FLIP and swipe
-   transforms are gated in JS; this neutralizes CSS transitions/animations. */
+   transforms are gated in JS; this neutralizes CSS transitions/animations,
+   incl. the countdown bar (which jumps straight to empty). */
 @media (prefers-reduced-motion: reduce) {
   :where([data-embertoast-toaster] *),
   .et-toast {
