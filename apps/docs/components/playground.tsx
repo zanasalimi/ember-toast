@@ -6,9 +6,8 @@
  * dogfood and the proof in one component: every control mutates the same store the
  * page renders from.
  *
- * Editorial control panel, not a centered demo card: a labeled board with a fired
- * triggers row, a settings rail, and a generated-code line that mirrors the live
- * <Toaster/> config so the panel reads like a spec, not a toy.
+ * The <Toaster/> portals to document.body, so toasts span the whole page (you can
+ * see them land in any corner) rather than being trapped inside this panel.
  */
 
 import { useState } from "react";
@@ -29,7 +28,7 @@ const POSITIONS: Position[] = [
 const THEMES = ["system", "light", "dark"] as const;
 type Theme = (typeof THEMES)[number];
 
-/** A staged, determinate upload: one toast whose progress is patched to 100%, then settled. */
+/** A staged, determinate upload: progress is patched to 100%, then it morphs to "complete". */
 function runUpload() {
   const id = toast.info("0% · 2.4 MB", {
     title: "Uploading report.pdf",
@@ -39,20 +38,23 @@ function runUpload() {
   let p = 0;
   const tick = setInterval(() => {
     p = Math.min(1, p + 0.07);
+    toast.update(id, { message: `${Math.round(p * 100)}% · 2.4 MB`, progress: p });
     if (p >= 1) {
       clearInterval(tick);
-      toast.success("report.pdf · 2.4 MB", {
-        id,
-        title: "Upload complete",
-        progress: undefined,
-        timestamp: Date.now(),
-        duration: 4000,
-        timerBar: true,
-      });
-    } else {
-      toast.update(id, { message: `${Math.round(p * 100)}% · 2.4 MB`, progress: p });
+      // Let the bar settle at 100%, then morph in place to the success state —
+      // the icon, bar color, and content all crossfade rather than snapping.
+      setTimeout(() => {
+        toast.success("report.pdf · 2.4 MB", {
+          id,
+          title: "Upload complete",
+          progress: undefined,
+          timestamp: Date.now(),
+          duration: 4000,
+          timerBar: true,
+        });
+      }, 440);
     }
-  }, 220);
+  }, 200);
 }
 
 export function Playground() {
@@ -60,6 +62,17 @@ export function Playground() {
   const [theme, setTheme] = useState<Theme>("dark");
   const [closeButton, setCloseButton] = useState(true);
   const [visibleToasts, setVisibleToasts] = useState(3);
+  const [withActions, setWithActions] = useState(true);
+  const [durationSec, setDurationSec] = useState(4);
+
+  const duration = durationSec * 1000;
+
+  // CTAs are optional — included only when the "actions" control is on. This
+  // spreads `{ actions: [...] }` or nothing, so a toast can have zero CTAs.
+  const acts = (labels: string[]) =>
+    withActions
+      ? { actions: labels.map((label) => ({ label, onClick: () => toast(label) })) }
+      : {};
 
   const triggers: { label: string; run: () => void }[] = [
     {
@@ -70,10 +83,8 @@ export function Playground() {
           {
             title: "Context updated",
             timestamp: Date.now(),
-            actions: [
-              { label: "View context", onClick: () => toast.success("Opened context.") },
-              { label: "Manage memory", onClick: () => toast("Memory settings.") },
-            ],
+            duration,
+            ...acts(["View context", "Manage memory"]),
           },
         ),
     },
@@ -85,10 +96,8 @@ export function Playground() {
           {
             title: "More information needed",
             timestamp: Date.now(),
-            actions: [
-              { label: "Add details", onClick: () => toast("Add more detail.") },
-              { label: "See what's missing", onClick: () => toast("Showing gaps.") },
-            ],
+            duration,
+            ...acts(["Add details", "See what's missing"]),
           },
         ),
     },
@@ -100,10 +109,8 @@ export function Playground() {
           {
             title: "Task completed",
             timestamp: Date.now(),
-            actions: [
-              { label: "Review output", onClick: () => toast.success("Reviewing.") },
-              { label: "Refine result", onClick: () => toast("Refining…") },
-            ],
+            duration,
+            ...acts(["Review output", "Refine result"]),
           },
         ),
     },
@@ -115,10 +122,8 @@ export function Playground() {
           {
             title: "Unable to complete request",
             timestamp: Date.now(),
-            actions: [
-              { label: "Try again", onClick: () => toast.loading("Retrying…") },
-              { label: "Learn why this happened", onClick: () => toast("Details.") },
-            ],
+            duration,
+            ...acts(["Try again", "Learn why this happened"]),
           },
         ),
     },
@@ -127,15 +132,11 @@ export function Playground() {
       run: () =>
         toast.success("Task has been updated with the recent changes.", {
           title: "Changes saved",
-          duration: 4000,
+          duration,
           timerBar: true,
-          footer: "This message will close in 4 seconds. Hover to stop.",
+          footer: `This message will close in ${durationSec} seconds. Hover to stop.`,
           actions: [
-            {
-              label: "Undo",
-              variant: "button",
-              onClick: () => toast("Reverted the change."),
-            },
+            { label: "Undo", variant: "button", onClick: () => toast("Reverted the change.") },
           ],
         }),
     },
@@ -195,7 +196,7 @@ export function Playground() {
         Dismiss all
       </button>
 
-      {/* Settings rail — these mutate the mounted <Toaster/> props live. */}
+      {/* Settings rail — these mutate the mounted <Toaster/> (and the fired toasts) live. */}
       <div className="mt-5 space-y-3 border-t border-rule pt-4">
         <Field label="position">
           <PositionSelect value={position} onChange={setPosition} />
@@ -210,6 +211,16 @@ export function Playground() {
             onChange={setVisibleToasts}
           />
         </Field>
+        <Field label="duration (s)">
+          <Segmented
+            options={[2, 4, 8]}
+            value={durationSec}
+            onChange={setDurationSec}
+          />
+        </Field>
+        <Field label="actions (cta)">
+          <Toggle checked={withActions} onChange={setWithActions} />
+        </Field>
         <Field label="closeButton">
           <Toggle checked={closeButton} onChange={setCloseButton} />
         </Field>
@@ -222,7 +233,7 @@ export function Playground() {
         {" />"}
       </p>
 
-      {/* The single, live-driven renderer. */}
+      {/* The single, live-driven renderer — portals to <body>, so toasts span the page. */}
       <Toaster
         position={position}
         theme={theme}
