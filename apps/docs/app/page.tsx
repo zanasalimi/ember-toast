@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Playground } from "@/components/playground";
 import { CodeBlock } from "@/components/code-block";
 import { CopyButton } from "@/components/copy-button";
-import { HeroToastStack } from "@/components/hero-toast-stack";
+import { HeroLive } from "@/components/hero-live";
 
 /**
  * Home — clean, full-width light product page. No floating panel: nav and sections
@@ -88,11 +88,7 @@ export default function HomePage() {
           </div>
 
           <div className="animate-rise-in min-w-0" style={{ animationDelay: "0.22s" }}>
-            <div className="flex justify-center overflow-hidden py-4 lg:justify-end lg:overflow-visible lg:py-0">
-              <div className="origin-center scale-[0.72] sm:scale-90 lg:scale-100">
-                <HeroToastStack />
-              </div>
-            </div>
+            <HeroLive />
           </div>
         </div>
       </section>

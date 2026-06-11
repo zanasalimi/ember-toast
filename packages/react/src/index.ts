@@ -6,7 +6,7 @@
  * you use the styled default: `import "@embertoast/react/styles.css";`
  */
 
-export { toast } from "@embertoast/core";
+export { toast, createStore } from "@embertoast/core";
 export type {
   Toast,
   ToastId,
@@ -17,6 +17,7 @@ export type {
   Position,
   AriaLive,
   PromiseMessages,
+  ToastStoreApi,
 } from "@embertoast/core";
 
 export { Toaster } from "./Toaster";
