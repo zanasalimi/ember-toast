@@ -81,6 +81,12 @@ export function useSwipe(
     onPointerDown(e) {
       // Ignore non-primary buttons and modified clicks.
       if (e.button !== 0) return;
+      // Don't hijack presses that begin on an interactive control (close button,
+      // action links/buttons). Capturing the pointer on the <li> would redirect
+      // pointerup away from the control and suppress its click — so bail and let
+      // the control's own onClick fire. Opt extra elements out with data-et-no-swipe.
+      const target = e.target as HTMLElement;
+      if (target.closest("button, a, [data-et-no-swipe]")) return;
       start.current = { x: e.clientX, t: e.timeStamp };
       // setPointerCapture is absent in jsdom; guard so unit tests don't throw.
       e.currentTarget.setPointerCapture?.(e.pointerId);
