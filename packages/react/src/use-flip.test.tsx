@@ -41,7 +41,7 @@ describe("FLIP reflow", () => {
         return 0;
       });
 
-    const { container } = render(<Toaster />);
+    const { container } = render(<Toaster container={false} />);
     let a = "";
     act(() => {
       a = toast("a");
@@ -95,7 +95,7 @@ describe("FLIP reflow", () => {
       },
     );
 
-    const { container } = render(<Toaster />);
+    const { container } = render(<Toaster container={false} />);
     let a = "";
     act(() => {
       a = toast("a");

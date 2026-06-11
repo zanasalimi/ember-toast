@@ -95,7 +95,7 @@ describe("Toaster", () => {
   });
 
   it("limits rendered toasts to visibleToasts per position", () => {
-    const { container } = render(<Toaster visibleToasts={2} />);
+    const { container } = render(<Toaster visibleToasts={2} container={false} />);
     act(() => {
       toast("a");
       toast("b");

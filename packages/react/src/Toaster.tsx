@@ -12,7 +12,9 @@
  * beyond the transient "still animating out" set owned by `usePresence`.
  */
 
+import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import type { Position } from "@embertoast/core";
 import { useToasts } from "./use-toasts";
 import { ToastItem } from "./ToastItem";
@@ -51,6 +53,13 @@ export interface ToasterProps {
   expand?: boolean;
   /** Extra class on each region container. */
   className?: string;
+  /**
+   * Where to portal the toast regions. Defaults to `document.body` so the fixed
+   * positioning is always viewport-relative and never trapped by a transformed,
+   * filtered, or `backdrop-blur`ed ancestor (which would create a containing
+   * block). Pass `false` to render in place instead.
+   */
+  container?: HTMLElement | false;
 }
 
 /** One positioned `aria-live` region holding the visible toasts for that corner. */
@@ -135,8 +144,14 @@ export function Toaster({
   offset,
   expand = true,
   className,
+  container,
 }: ToasterProps) {
   const toasts = useToasts();
+  // Portal to the body only after mount: the server (and first client paint)
+  // render nothing, which both avoids a hydration mismatch and keeps the toasts
+  // client-only (their store snapshot is empty on the server anyway).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // The set actually on screen: per position, the live toasts trimmed to
   // `visibleToasts` (the rest queue, unseen). Presence tracks departures from this
@@ -152,7 +167,7 @@ export function Toaster({
   // so a region survives its last toast's exit instead of unmounting mid-animation.
   const { present, done } = usePresence(visible);
 
-  return (
+  const tree = (
     <>
       {POSITIONS.map((pos) => {
         const items = present.filter(
@@ -177,4 +192,10 @@ export function Toaster({
       })}
     </>
   );
+
+  // Render in place when explicitly opted out; otherwise portal to the body so
+  // positioning is viewport-relative regardless of where <Toaster/> is mounted.
+  if (container === false) return tree;
+  if (!mounted) return null;
+  return createPortal(tree, container ?? document.body);
 }
