@@ -1,0 +1,98 @@
+# embertoast
+
+> Headless-first toast/notification primitive for React. Zero runtime dependencies.
+> Call `toast()` from anywhere (even outside React); mount one `<Toaster/>` to render.
+> Package: `@embertoast/react` (React binding) · `@embertoast/core` (framework-agnostic store).
+
+## Install
+
+```
+npm i @embertoast/react      # or: pnpm add / yarn add / bun add
+```
+
+## Setup — do this ONCE, near the app root (e.g. the root layout)
+
+```tsx
+import { Toaster } from "@embertoast/react";
+import "@embertoast/react/styles.css"; // omit only if you render your own markup
+
+// Mount a single <Toaster/>. It portals to <body>, so it's never trapped by a
+// transformed/blurred ancestor; position is viewport-relative.
+<Toaster position="bottom-right" theme="system" />
+```
+
+## Fire toasts — from anywhere (components, event handlers, non-React modules)
+
+```ts
+import { toast } from "@embertoast/react";
+
+toast("Saved");
+toast.success("Profile updated");
+toast.error("Upload failed");
+toast.info("3 new comments");
+toast.warning("Low on storage");
+toast.loading("Working…");          // persistent until updated/dismissed
+```
+
+## Rich toast (all options are optional)
+
+```ts
+toast.success("Task has been updated with the recent changes.", {
+  title: "Changes saved",            // bold heading; the first arg becomes the body
+  timestamp: Date.now(),             // number = epoch ms (auto-formatted) | string (verbatim)
+  duration: 4000,                    // ms; Infinity = stays open
+  timerBar: true,                    // depleting countdown bar at the bottom edge
+  footer: "Closes in 4s. Hover to stop.",
+  actions: [                         // OPTIONAL CTAs — omit for no buttons
+    { label: "Undo", variant: "button", onClick: undo },   // filled button
+    { label: "Details", onClick: openDetails },            // underlined link (default)
+  ],
+});
+```
+
+## Promise — one toast morphs loading → success/error in place
+
+```ts
+toast.promise(saveFile(file), {
+  loading: "Saving…",
+  success: (res) => `Saved ${res.name}`,
+  error: (err) => `Failed: ${err.message}`,
+});
+```
+
+## Upload / determinate progress
+
+```ts
+const id = toast.info("0%", { title: "Uploading…", duration: Infinity, progress: 0 });
+toast.update(id, { progress: 0.5, message: "50%" });               // patch as it advances
+toast.success("Done", { id, progress: undefined, timerBar: true }); // clear bar + morph to success
+```
+
+## Control
+
+```ts
+toast.dismiss(id);          // dismiss one
+toast.dismiss();            // dismiss all
+toast.update(id, patch);    // patch in place
+```
+
+## `<Toaster/>` props
+
+`position` ("top|bottom-left|center|right") · `theme` ("light|dark|system") ·
+`visibleToasts` (number, rest queue) · `closeButton` (boolean) · `expand` (boolean) ·
+`gap` / `offset` (px) · `container` (`HTMLElement | false` — defaults to `document.body`).
+
+## Headless (bring your own UI)
+
+Skip the stylesheet, subscribe with `useToasts(): Toast[]`, and render your own markup.
+`@embertoast/core` holds the state; the renderer never owns it.
+
+## Rules for code generation (read these)
+
+- Mount EXACTLY ONE `<Toaster/>` for the whole app (root layout/_app), not per component.
+- `toast(...)` is a function, not a hook — import and call it anywhere, including outside React.
+- Import `@embertoast/react/styles.css` once for the styled default (or go headless).
+- The package is `@embertoast/react` (not "embertoast"); the core is `@embertoast/core`.
+- Do not add a second toast library alongside it.
+
+Full docs: https://embertoast.dev

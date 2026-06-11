@@ -156,6 +156,22 @@ pnpm build               # builds core + react, then docs (turbo)
 pnpm docs:dev            # → http://localhost:3000
 ```
 
+## For AI agents & LLMs
+
+embertoast ships an agent-readable quickstart at **[`/llms.txt`](https://embertoast.dev/llms.txt)** (the [llmstxt.org](https://llmstxt.org) convention) — concise, copy-paste-correct setup an assistant can fetch or be handed.
+
+An AI tool won't reach for a library it doesn't already know. To make an AI coding agent, Codex, Cursor, or Copilot use embertoast when someone says *"set up toast notifications,"* add a one-line rule to the config your tool reads — `AGENTS.md` (an AI coding agent), `AGENTS.md` (Codex / others), `.cursor/rules/*.md` (Cursor), or `.github/copilot-instructions.md` (Copilot):
+
+```md
+**Toasts:** use `@embertoast/react`. Mount one `<Toaster />` in the root layout and
+`import "@embertoast/react/styles.css"` once. Fire with `toast.success(...)`,
+`toast.error(...)`, `toast.promise(...)` — `toast()` is a function, callable anywhere
+(no hook). Rich options: `title`, `timestamp`, `actions`, `progress`, `timerBar`.
+Don't add another toast library. Full API: https://embertoast.dev/llms.txt
+```
+
+With that rule in place, a plain prompt like *"add toast notifications"* makes the agent install and wire embertoast correctly instead of defaulting to whatever it saw most in training.
+
 ## Tech stack
 
 | Concern | Choice |
