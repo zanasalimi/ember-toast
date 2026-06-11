@@ -1,14 +1,9 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Midnight pro-tool identity — cinematic dark, not default-shadcn.
- *
- * - Near-black canvas, elevated graphite surfaces, warm off-white ink.
- * - ONE electric accent: ember/orange, brightened for dark and given a glow.
- * - Type pairing: an editorial serif for oversized display, a clean sans for body,
- *   JetBrains Mono for the spec-sheet labels and numbers. The pairing is the signal.
- *
- * Fonts are wired via next/font in app/layout.tsx, exposing the CSS variables below.
+ * Clean light product identity — calm, roomy, white panels on a soft grey field.
+ * One ember accent. Geist throughout, set bold + tight for headlines. The opposite
+ * of dark-cinematic: clarity, whitespace, hairline borders, gentle shadows.
  */
 const config: Config = {
   content: [
@@ -19,61 +14,43 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        base: "#09090B", // the page — near-black
-        paper: "#16161A", // elevated surface: chips, controls
-        surface: "#1C1C21", // a step brighter for raised panels
-        ink: "#F4F2EC", // warm off-white text
-        muted: "#8A8A93",
-        faint: "#56565E",
-        rule: "rgba(255,255,255,0.08)", // hairline rules on dark
+        base: "#ECECEF", // the soft grey field the panel floats on
+        paper: "#FFFFFF", // panels + cards
+        surface: "#F4F4F6", // subtle grey for chips, inputs, controls
+        ink: "#15151A", // near-black text
+        muted: "#6B6B74",
+        faint: "#9C9CA4",
+        rule: "rgba(18,18,24,0.08)", // hairline rules on light
         ember: {
-          DEFAULT: "#FF6A1F", // brightened brand accent for dark
-          soft: "rgba(255,106,31,0.12)",
-          deep: "#E8590C",
-          glow: "rgba(255,106,31,0.55)",
+          DEFAULT: "#E8590C",
+          soft: "#FFEDE2",
+          deep: "#B23E00",
         },
       },
       fontFamily: {
-        // Geist everywhere — heavy + tight for display, regular for body.
         display: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         serif: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       fontSize: {
-        // Oversized, cinematic display scale.
-        mega: ["clamp(3.5rem, 11vw, 8.5rem)", { lineHeight: "0.9", letterSpacing: "-0.035em" }],
-        display: ["clamp(3rem, 7vw, 5.5rem)", { lineHeight: "0.95", letterSpacing: "-0.025em" }],
-        h1: ["clamp(2rem, 4vw, 3rem)", { lineHeight: "1.05", letterSpacing: "-0.015em" }],
-        lede: ["clamp(1.125rem, 2vw, 1.5rem)", { lineHeight: "1.5" }],
+        mega: ["clamp(2.5rem, 5.2vw, 3.85rem)", { lineHeight: "1.04", letterSpacing: "-0.03em" }],
+        display: ["clamp(2.25rem, 4vw, 3.25rem)", { lineHeight: "1.05", letterSpacing: "-0.025em" }],
+        h1: ["clamp(1.75rem, 3vw, 2.5rem)", { lineHeight: "1.1", letterSpacing: "-0.02em" }],
+        lede: ["clamp(1.0625rem, 1.6vw, 1.25rem)", { lineHeight: "1.6" }],
       },
       maxWidth: {
-        prose: "62ch",
-        editorial: "78rem",
+        prose: "54ch",
+        editorial: "72rem",
       },
       keyframes: {
         "rise-in": {
-          from: { opacity: "0", transform: "translateY(18px)" },
+          from: { opacity: "0", transform: "translateY(14px)" },
           to: { opacity: "1", transform: "translateY(0)" },
-        },
-        "glow-pulse": {
-          "0%, 100%": { opacity: "0.5" },
-          "50%": { opacity: "0.85" },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-7px)" },
-        },
-        marquee: {
-          from: { transform: "translateX(0)" },
-          to: { transform: "translateX(-50%)" },
         },
       },
       animation: {
-        "rise-in": "rise-in 0.8s cubic-bezier(0.21,1.02,0.42,1) both",
-        "glow-pulse": "glow-pulse 5s ease-in-out infinite",
-        float: "float 6s ease-in-out infinite",
-        marquee: "marquee 26s linear infinite",
+        "rise-in": "rise-in 0.7s cubic-bezier(0.21,1.02,0.42,1) both",
       },
     },
   },

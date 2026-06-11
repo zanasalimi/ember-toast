@@ -59,7 +59,7 @@ function runUpload() {
 
 export function Playground() {
   const [position, setPosition] = useState<Position>("bottom-right");
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
   const [closeButton, setCloseButton] = useState(true);
   const [visibleToasts, setVisibleToasts] = useState(3);
   const [withActions, setWithActions] = useState(true);
@@ -161,7 +161,7 @@ export function Playground() {
 
   return (
     <div
-      className="min-w-0 rounded-[16px] border border-rule bg-white/[0.035] p-5 shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_30px_80px_-40px_rgba(0,0,0,0.8)] backdrop-blur-xl"
+      className="min-w-0 rounded-2xl border border-rule bg-paper p-5 shadow-[0_1px_2px_rgba(20,20,30,0.04),0_18px_44px_-30px_rgba(20,20,30,0.22)]"
       aria-label="Live toast playground"
     >
       <div className="flex items-center justify-between">
@@ -181,7 +181,7 @@ export function Playground() {
             key={label}
             type="button"
             onClick={run}
-            className="rounded-md border border-rule bg-paper px-3 py-2 text-sm font-medium text-ink transition hover:border-ember hover:text-ember active:translate-y-px"
+            className="rounded-md border border-rule bg-surface px-3 py-2 text-sm font-medium text-ink transition hover:border-ember hover:text-ember active:translate-y-px"
           >
             {label}
           </button>
@@ -272,7 +272,7 @@ function Toggle({
     <Switch.Root
       checked={checked}
       onCheckedChange={onChange}
-      className="relative h-[22px] w-[38px] rounded-full border border-rule bg-paper transition data-[state=checked]:border-ember data-[state=checked]:bg-ember"
+      className="relative h-[22px] w-[38px] rounded-full border border-rule bg-surface transition data-[state=checked]:border-ember data-[state=checked]:bg-ember"
     >
       <Switch.Thumb className="block h-[16px] w-[16px] translate-x-[2px] rounded-full bg-ink/40 transition-transform will-change-transform data-[state=checked]:translate-x-[18px] data-[state=checked]:bg-white" />
     </Switch.Root>
@@ -299,7 +299,7 @@ function Segmented<T extends number>({
           className={`px-2.5 py-1 font-mono text-[12px] transition ${
             value === opt
               ? "bg-ember text-white"
-              : "bg-paper text-muted hover:text-ink"
+              : "bg-surface text-muted hover:text-ink"
           }`}
         >
           {opt}
@@ -356,7 +356,7 @@ function BaseSelect({
 }) {
   return (
     <Select.Root value={value} onValueChange={onChange}>
-      <Select.Trigger className="inline-flex min-w-[140px] items-center justify-between gap-2 rounded-md border border-rule bg-paper px-2.5 py-1 font-mono text-[12px] text-ink transition hover:border-ember data-[state=open]:border-ember">
+      <Select.Trigger className="inline-flex min-w-[140px] items-center justify-between gap-2 rounded-md border border-rule bg-surface px-2.5 py-1 font-mono text-[12px] text-ink transition hover:border-ember data-[state=open]:border-ember">
         <Select.Value />
         <Select.Icon className="text-muted">▾</Select.Icon>
       </Select.Trigger>
