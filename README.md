@@ -4,7 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@embertoast/react?color=E8590C&label=%40embertoast%2Freact)](https://www.npmjs.com/package/@embertoast/react)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@embertoast/react?label=min%2Bgzip)](https://bundlephobia.com/package/@embertoast/react)
-[![CI](https://img.shields.io/github/actions/workflow/status/zanasalimi/embertoast/ci.yml?branch=main&label=CI)](https://github.com/zanasalimi/embertoast/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/zanasalimi/ember-toast/ci.yml?branch=main&label=CI)](https://github.com/zanasalimi/ember-toast/actions/workflows/ci.yml)
 [![types](https://img.shields.io/npm/types/@embertoast/react)](https://www.npmjs.com/package/@embertoast/react)
 [![license](https://img.shields.io/npm/l/@embertoast/react?color=blue)](LICENSE)
 

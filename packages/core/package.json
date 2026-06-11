@@ -13,11 +13,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zanasalimi/embertoast.git",
+    "url": "git+https://github.com/zanasalimi/ember-toast.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/zanasalimi/embertoast#readme",
-  "bugs": "https://github.com/zanasalimi/embertoast/issues",
+  "homepage": "https://github.com/zanasalimi/ember-toast#readme",
+  "bugs": "https://github.com/zanasalimi/ember-toast/issues",
   "sideEffects": false,
   "type": "module",
   "main": "./dist/index.cjs",

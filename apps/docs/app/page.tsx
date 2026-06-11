@@ -20,12 +20,12 @@ export default function HomePage() {
             <span className="text-2xl font-bold tracking-tight text-ink">embertoast</span>
           </Link>
           <nav className="hidden items-center gap-8 text-sm text-muted md:flex">
-            <a className="no-underline transition hover:text-ink" href="https://github.com/zanasalimi/embertoast">GitHub</a>
+            <a className="no-underline transition hover:text-ink" href="https://github.com/zanasalimi/ember-toast">GitHub</a>
             <a className="no-underline transition hover:text-ink" href="https://www.npmjs.com/package/@embertoast/react">npm</a>
             <a className="no-underline transition hover:text-ink" href="#configure">Configure</a>
           </nav>
           <a
-            href="https://github.com/zanasalimi/embertoast"
+            href="https://github.com/zanasalimi/ember-toast"
             className="inline-flex items-center gap-2 rounded-full bg-ember px-4 py-2 text-sm font-medium text-white no-underline shadow-[0_6px_16px_-8px_rgba(232,89,12,0.7)] transition hover:bg-ember-deep"
           >
             <span aria-hidden>★</span> Give a Star
@@ -63,7 +63,7 @@ export default function HomePage() {
               style={{ animationDelay: "0.19s" }}
             >
               <a
-                href="https://github.com/zanasalimi/embertoast"
+                href="https://github.com/zanasalimi/ember-toast"
                 className="inline-flex items-center gap-2 rounded-full bg-ember px-5 py-2.5 text-sm font-medium text-white no-underline shadow-[0_8px_20px_-10px_rgba(232,89,12,0.8)] transition hover:bg-ember-deep"
               >
                 View source <span aria-hidden>↗</span>
@@ -166,7 +166,7 @@ pnpm add @embertoast/react`}
         <div className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-between gap-4 font-mono text-xs text-muted">
           <span>embertoast · MIT · Zana Salimi</span>
           <nav className="flex gap-6">
-            <a className="no-underline hover:text-ink" href="https://github.com/zanasalimi/embertoast">GitHub</a>
+            <a className="no-underline hover:text-ink" href="https://github.com/zanasalimi/ember-toast">GitHub</a>
             <a className="no-underline hover:text-ink" href="https://www.npmjs.com/package/@embertoast/react">npm</a>
           </nav>
         </div>
