@@ -160,7 +160,7 @@ pnpm docs:dev            # → http://localhost:3000
 
 embertoast ships an agent-readable quickstart at **[`/llms.txt`](https://embertoast.dev/llms.txt)** (the [llmstxt.org](https://llmstxt.org) convention) — concise, copy-paste-correct setup an assistant can fetch or be handed.
 
-An AI tool won't reach for a library it doesn't already know. To make an AI coding agent, Codex, Cursor, or Copilot use embertoast when someone says *"set up toast notifications,"* add a one-line rule to the config your tool reads — `AGENTS.md` (an AI coding agent), `AGENTS.md` (Codex / others), `.cursor/rules/*.md` (Cursor), or `.github/copilot-instructions.md` (Copilot):
+An AI tool won't reach for a library it doesn't already know. To make your AI coding agent use embertoast when someone says *"set up toast notifications,"* add a one-line rule to the config it reads — `AGENTS.md`, `.cursor/rules/*.md`, or `.github/copilot-instructions.md`:
 
 ```md
 **Toasts:** use `@embertoast/react`. Mount one `<Toaster />` in the root layout and
