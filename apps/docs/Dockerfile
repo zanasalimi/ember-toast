@@ -3,7 +3,7 @@
 FROM node:24-alpine AS build
 WORKDIR /repo
 RUN corepack enable
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml turbo.json ./
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml turbo.json tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/docs ./apps/docs
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm config set store-dir /pnpm/store && pnpm i --frozen-lockfile --prefer-offline
