@@ -7,7 +7,9 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml turbo.json tsconfig.base.js
 COPY packages ./packages
 COPY apps/docs ./apps/docs
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm config set store-dir /pnpm/store && pnpm i --frozen-lockfile --prefer-offline
-RUN pnpm --filter docs build          # builds core + react + docs (turbo)
+# Build the workspace libs first so the docs app can resolve their dist output,
+# then build the docs site.
+RUN pnpm --filter @embertoast/core --filter @embertoast/react build && pnpm --filter docs build
 FROM node:24-alpine AS run
 WORKDIR /app
 ENV NODE_ENV=production
