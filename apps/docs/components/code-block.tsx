@@ -19,7 +19,7 @@ export async function CodeBlock({
   const html = await highlight(code, lang);
 
   return (
-    <figure className="overflow-hidden rounded-[12px] border border-rule bg-[#101010] text-sm">
+    <figure className="min-w-0 max-w-full overflow-hidden rounded-[12px] border border-rule bg-[#101010] text-sm">
       <figcaption className="flex items-center justify-between border-b border-white/10 px-4 py-2">
         <span className="font-mono text-[11px] text-white/45">
           {filename ?? lang}

@@ -124,7 +124,7 @@
 
 /* Horizontal anchoring */
 .et-toaster[data-position$="-left"] {
-  left: var(--et-offset);
+  left: calc(var(--et-offset) + env(safe-area-inset-left));
   align-items: flex-start;
 }
 .et-toaster[data-position$="-center"] {
@@ -133,17 +133,17 @@
   align-items: center;
 }
 .et-toaster[data-position$="-right"] {
-  right: var(--et-offset);
+  right: calc(var(--et-offset) + env(safe-area-inset-right));
   align-items: flex-end;
 }
 
 /* Vertical anchoring — bottom stacks newest nearest the edge. */
 .et-toaster[data-position^="top-"] {
-  top: var(--et-offset);
+  top: calc(var(--et-offset) + env(safe-area-inset-top));
   flex-direction: column;
 }
 .et-toaster[data-position^="bottom-"] {
-  bottom: var(--et-offset);
+  bottom: calc(var(--et-offset) + env(safe-area-inset-bottom));
   flex-direction: column-reverse;
 }
 

@@ -19,6 +19,9 @@
 
   body {
     @apply bg-paper text-ink font-sans antialiased;
+    /* No horizontal scroll: a wider-than-viewport layout makes mobile shrink-to-fit,
+       which pushes fixed-bottom toasts below the visual fold. */
+    overflow-x: hidden;
   }
 
   /* Editorial serif display headings. */
