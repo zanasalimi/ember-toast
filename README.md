@@ -8,12 +8,13 @@
 [![types](https://img.shields.io/npm/types/@embertoast/react)](https://www.npmjs.com/package/@embertoast/react)
 [![license](https://img.shields.io/npm/l/@embertoast/react?color=blue)](LICENSE)
 
-<!-- HERO MEDIA — placeholder. Drop docs/media/hero.gif in to replace; see docs/media/README.md. -->
 <p align="center">
-  <img src="docs/media/hero.gif" alt="The embertoast playground firing a stack of success, error, and info toasts, one auto-dismissing as the others slide into place" width="900">
+  <img src="docs/media/hero.png" alt="embertoast notifications in dark and light themes — a success toast with an Undo action, an error with a Retry button, an upload with a determinate progress bar, and a loading state" width="900">
 </p>
 
-[Live playground](https://embertoast.dev) · [Docs](#docs--playground) · [30-second tour](docs/media/walkthrough.mp4)
+<p align="center">
+  <a href="https://zanasalimi.github.io/ember-toast/">Live playground</a> · <a href="https://www.npmjs.com/package/@embertoast/react">npm</a> · <a href="#docs--playground">Docs</a>
+</p>
 
 ---
 
@@ -130,15 +131,7 @@ function App() {
 
 The docs site **is** a live playground: it dogfoods `@embertoast/react`, mounts a real `<Toaster/>`, and fires real toasts from controls that change `position`, `theme`, `richColors`, `closeButton`, and `visibleToasts` on the fly — including a `toast.promise` demo for both the resolve and reject branches. Editorial single-page showcase, not a docs maze.
 
-<!-- The following embeds are placeholders — drop the real captures into docs/media/. -->
-| | |
-|---|---|
-| ![FLIP reflow: dismiss one toast from a stack and the survivors slide up](docs/media/flip-reflow.gif) | ![A promise toast morphing from loading to success in place](docs/media/promise-morph.gif) |
-| **FLIP reflow** — survivors slide into the freed space. | **Promise morph** — one toast, loading → success, in place. |
-| ![Swipe-to-dismiss: drag a toast past the threshold to fling it out](docs/media/swipe-out.gif) | [▶ 30-second walkthrough](docs/media/walkthrough.mp4) |
-| **Swipe-to-dismiss** — past threshold flings out, under snaps back. | **Walkthrough** — the full tour (~75s). |
-
-> The clips above are placeholder paths until the screen recordings are dropped in. Capture instructions and the exact filenames live in [`docs/media/README.md`](docs/media/README.md).
+See every behavior live in the [playground](https://zanasalimi.github.io/ember-toast/) — fire each variant, flip the theme, watch an upload morph into a result, swipe one away.
 
 ### Run it locally
 
@@ -158,7 +151,7 @@ pnpm docs:dev            # → http://localhost:3000
 
 ## For AI agents & LLMs
 
-embertoast ships an agent-readable quickstart at **[`/llms.txt`](https://embertoast.dev/llms.txt)** (the [llmstxt.org](https://llmstxt.org) convention) — concise, copy-paste-correct setup an assistant can fetch or be handed.
+embertoast ships an agent-readable quickstart at **[`/llms.txt`](https://zanasalimi.github.io/ember-toast/llms.txt)** (the [llmstxt.org](https://llmstxt.org) convention) — concise, copy-paste-correct setup an assistant can fetch or be handed.
 
 An AI tool won't reach for a library it doesn't already know. To make your AI coding agent use embertoast when someone says *"set up toast notifications,"* add a one-line rule to the config it reads — `AGENTS.md`, `.cursor/rules/*.md`, or `.github/copilot-instructions.md`:
 
@@ -167,7 +160,7 @@ An AI tool won't reach for a library it doesn't already know. To make your AI co
 `import "@embertoast/react/styles.css"` once. Fire with `toast.success(...)`,
 `toast.error(...)`, `toast.promise(...)` — `toast()` is a function, callable anywhere
 (no hook). Rich options: `title`, `timestamp`, `actions`, `progress`, `timerBar`.
-Don't add another toast library. Full API: https://embertoast.dev/llms.txt
+Don't add another toast library. Full API: https://zanasalimi.github.io/ember-toast/llms.txt
 ```
 
 With that rule in place, a plain prompt like *"add toast notifications"* makes the agent install and wire embertoast correctly instead of defaulting to whatever it saw most in training.
