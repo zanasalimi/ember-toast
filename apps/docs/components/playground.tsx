@@ -161,7 +161,7 @@ export function Playground() {
 
   return (
     <div
-      className="min-w-0 rounded-[14px] border border-rule bg-white/70 p-5 shadow-[0_1px_0_rgba(10,10,10,0.04),0_18px_40px_-24px_rgba(10,10,10,0.25)] backdrop-blur-sm"
+      className="min-w-0 rounded-[16px] border border-rule bg-white/[0.035] p-5 shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_30px_80px_-40px_rgba(0,0,0,0.8)] backdrop-blur-xl"
       aria-label="Live toast playground"
     >
       <div className="flex items-center justify-between">

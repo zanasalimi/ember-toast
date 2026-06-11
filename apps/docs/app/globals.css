@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 /*
- * Editorial base layer. The look is carried by typography and spacing rhythm,
- * not by component chrome. Background is warm paper, ink is near-black, and the
- * single ember accent is reserved for focal moments (links, the live triggers).
+ * Midnight pro-tool base layer. Near-black canvas, warm off-white ink, one ember
+ * accent that glows. The product (the toasts) is the spectacle; the page is the
+ * dark theatre it performs in.
  */
 @layer base {
   :root {
-    color-scheme: light;
+    color-scheme: dark;
   }
 
   html {
@@ -18,13 +18,12 @@
   }
 
   body {
-    @apply bg-paper text-ink font-sans antialiased;
+    @apply bg-base text-ink font-sans antialiased;
     /* No horizontal scroll: a wider-than-viewport layout makes mobile shrink-to-fit,
        which pushes fixed-bottom toasts below the visual fold. */
     overflow-x: hidden;
   }
 
-  /* Editorial serif display headings. */
   h1,
   h2,
   h3 {
@@ -32,7 +31,8 @@
   }
 
   ::selection {
-    @apply bg-ember-soft text-ink;
+    background: var(--tw-ember, #ff6a1f);
+    color: #0a0a0c;
   }
 
   a {
@@ -41,7 +41,35 @@
 
   /* Visible, deliberate focus ring — accessibility is the product's whole pitch. */
   :focus-visible {
-    @apply outline-none ring-2 ring-ember ring-offset-2 ring-offset-paper;
+    @apply outline-none ring-2 ring-ember ring-offset-2;
+    --tw-ring-offset-color: #09090b;
+  }
+}
+
+@layer components {
+  /* The glowing accent word in the display headline. */
+  .text-glow {
+    text-shadow: 0 0 28px rgba(255, 106, 31, 0.55), 0 0 60px rgba(255, 106, 31, 0.28);
+  }
+
+  /* Fine film grain — a fixed, non-interactive overlay for cinematic texture. */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Faint technical grid, masked to fade out — atmosphere, not a pattern slap. */
+  .tech-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(120% 90% at 70% 0%, #000 0%, transparent 70%);
+    mask-image: radial-gradient(120% 90% at 70% 0%, #000 0%, transparent 70%);
   }
 }
 
@@ -54,4 +82,11 @@
   font-feature-settings: "liga" 0, "calt" 0;
 }
 
-/* The library's own styles are imported in app/layout.tsx; the docs dogfood it. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise-in,
+  .animate-glow-pulse,
+  .animate-float,
+  .animate-marquee {
+    animation: none !important;
+  }
+}
