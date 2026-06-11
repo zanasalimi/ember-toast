@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # apps/docs/Dockerfile — multi-stage, monorepo-aware (pnpm + turbo)
 FROM node:24-alpine AS build
 WORKDIR /repo
@@ -5,7 +6,7 @@ RUN corepack enable
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml turbo.json ./
 COPY packages ./packages
 COPY apps/docs ./apps/docs
-RUN pnpm i --frozen-lockfile
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm config set store-dir /pnpm/store && pnpm i --frozen-lockfile --prefer-offline
 RUN pnpm --filter docs build          # builds core + react + docs (turbo)
 FROM node:24-alpine AS run
 WORKDIR /app
