@@ -29,56 +29,132 @@ const POSITIONS: Position[] = [
 const THEMES = ["system", "light", "dark"] as const;
 type Theme = (typeof THEMES)[number];
 
-/** A fake upload that resolves or rejects after a beat — for the promise demo. */
-function fakeUpload(shouldReject: boolean): Promise<{ name: string }> {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (shouldReject) reject(new Error("network lost"));
-      else resolve({ name: "report.pdf" });
-    }, 1600);
+/** A staged, determinate upload: one toast whose progress is patched to 100%, then settled. */
+function runUpload() {
+  const id = toast.info("0% · 2.4 MB", {
+    title: "Uploading report.pdf",
+    duration: Infinity,
+    progress: 0,
   });
+  let p = 0;
+  const tick = setInterval(() => {
+    p = Math.min(1, p + 0.07);
+    if (p >= 1) {
+      clearInterval(tick);
+      toast.success("report.pdf · 2.4 MB", {
+        id,
+        title: "Upload complete",
+        progress: undefined,
+        timestamp: Date.now(),
+        duration: 4000,
+        timerBar: true,
+      });
+    } else {
+      toast.update(id, { message: `${Math.round(p * 100)}% · 2.4 MB`, progress: p });
+    }
+  }, 220);
 }
 
 export function Playground() {
   const [position, setPosition] = useState<Position>("bottom-right");
-  const [theme, setTheme] = useState<Theme>("light");
-  const [richColors, setRichColors] = useState(true);
+  const [theme, setTheme] = useState<Theme>("dark");
   const [closeButton, setCloseButton] = useState(true);
   const [visibleToasts, setVisibleToasts] = useState(3);
 
   const triggers: { label: string; run: () => void }[] = [
-    { label: "Default", run: () => toast("Heads up — something happened.") },
-    { label: "Success", run: () => toast.success("Profile saved.") },
-    { label: "Error", run: () => toast.error("Upload failed.") },
-    { label: "Info", run: () => toast.info("3 new comments.") },
+    {
+      label: "Context",
+      run: () =>
+        toast.info(
+          "I've added new information to your current session. Future responses will take this context into account.",
+          {
+            title: "Context updated",
+            timestamp: Date.now(),
+            actions: [
+              { label: "View context", onClick: () => toast.success("Opened context.") },
+              { label: "Manage memory", onClick: () => toast("Memory settings.") },
+            ],
+          },
+        ),
+    },
+    {
+      label: "Needs info",
+      run: () =>
+        toast.warning(
+          "I don't have enough context to give a reliable answer. Adding more details will improve accuracy and relevance.",
+          {
+            title: "More information needed",
+            timestamp: Date.now(),
+            actions: [
+              { label: "Add details", onClick: () => toast("Add more detail.") },
+              { label: "See what's missing", onClick: () => toast("Showing gaps.") },
+            ],
+          },
+        ),
+    },
+    {
+      label: "Completed",
+      run: () =>
+        toast.success(
+          "I've finished generating the result based on your instructions. You can review, refine, or continue from here.",
+          {
+            title: "Task completed",
+            timestamp: Date.now(),
+            actions: [
+              { label: "Review output", onClick: () => toast.success("Reviewing.") },
+              { label: "Refine result", onClick: () => toast("Refining…") },
+            ],
+          },
+        ),
+    },
+    {
+      label: "Unable",
+      run: () =>
+        toast.error(
+          "I couldn't complete this request due to missing access, unsupported input, or a temporary issue. Please try again or adjust your request.",
+          {
+            title: "Unable to complete request",
+            timestamp: Date.now(),
+            actions: [
+              { label: "Try again", onClick: () => toast.loading("Retrying…") },
+              { label: "Learn why this happened", onClick: () => toast("Details.") },
+            ],
+          },
+        ),
+    },
+    {
+      label: "Saved + timer",
+      run: () =>
+        toast.success("Task has been updated with the recent changes.", {
+          title: "Changes saved",
+          duration: 4000,
+          timerBar: true,
+          footer: "This message will close in 4 seconds. Hover to stop.",
+          actions: [
+            {
+              label: "Undo",
+              variant: "button",
+              onClick: () => toast("Reverted the change."),
+            },
+          ],
+        }),
+    },
+    { label: "Upload ▴", run: runUpload },
     {
       label: "Loading",
-      run: () => toast.loading("Crunching numbers…"),
+      run: () => toast.loading("Crunching the numbers.", { title: "Working…" }),
     },
     {
-      label: "Action",
+      label: "Promise",
       run: () =>
-        toast("Message archived.", {
-          action: { label: "Undo", onClick: () => toast.success("Restored.") },
-        }),
-    },
-    {
-      label: "Promise ✓",
-      run: () =>
-        toast.promise(fakeUpload(false), {
-          loading: "Uploading report…",
-          success: (r) => `Uploaded ${r.name}`,
-          error: "Upload failed",
-        }),
-    },
-    {
-      label: "Promise ✕",
-      run: () =>
-        toast.promise(fakeUpload(true), {
-          loading: "Uploading report…",
-          success: (r) => `Uploaded ${r.name}`,
-          error: (e) => `Failed: ${(e as Error).message}`,
-        }),
+        toast.promise(
+          new Promise((res) => setTimeout(() => res({ name: "report.pdf" }), 1600)),
+          {
+            loading: "Uploading report…",
+            success: (r) => `Uploaded ${(r as { name: string }).name}`,
+            error: "Upload failed",
+          },
+        ),
     },
   ];
 
@@ -134,9 +210,6 @@ export function Playground() {
             onChange={setVisibleToasts}
           />
         </Field>
-        <Field label="richColors">
-          <Toggle checked={richColors} onChange={setRichColors} />
-        </Field>
         <Field label="closeButton">
           <Toggle checked={closeButton} onChange={setCloseButton} />
         </Field>
@@ -145,7 +218,6 @@ export function Playground() {
       {/* Generated config — mirrors the live props, reads as a spec. */}
       <p className="mt-4 overflow-x-auto whitespace-nowrap font-mono text-[11px] leading-relaxed text-muted">
         {`<Toaster position="${position}" theme="${theme}" visibleToasts={${visibleToasts}}`}
-        {richColors ? " richColors" : ""}
         {closeButton ? " closeButton" : ""}
         {" />"}
       </p>
@@ -154,7 +226,6 @@ export function Playground() {
       <Toaster
         position={position}
         theme={theme}
-        richColors={richColors}
         closeButton={closeButton}
         visibleToasts={visibleToasts}
       />
