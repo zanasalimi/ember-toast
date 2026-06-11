@@ -34,9 +34,11 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["var(--font-display)", "Fraunces", "Georgia", "serif"],
-        sans: ["var(--font-body)", "Inter", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
+        // Geist everywhere — heavy + tight for display, regular for body.
+        display: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        serif: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       fontSize: {
         // Oversized, cinematic display scale.

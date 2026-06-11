@@ -2,7 +2,7 @@ import { Playground } from "@/components/playground";
 import { CodeBlock } from "@/components/code-block";
 import { CopyButton } from "@/components/copy-button";
 import { BackgroundFX } from "@/components/background-fx";
-import { HeroToasts } from "@/components/hero-toasts";
+import DisplayCards from "@/components/ui/display-cards";
 
 /**
  * Home = the showcase, midnight pro-tool. The product performs itself: a glowing
@@ -49,11 +49,11 @@ export default function HomePage() {
             </p>
 
             <h1
-              className="animate-rise-in mt-6 font-serif text-mega text-ink"
+              className="animate-rise-in mt-6 text-mega font-black leading-[0.9] tracking-[-0.045em] text-ink"
               style={{ animationDelay: "0.08s" }}
             >
               Toasts that{" "}
-              <span className="text-glow italic text-ember">behave</span>.
+              <span className="text-glow text-ember">behave</span>.
             </h1>
 
             <p
@@ -99,12 +99,21 @@ export default function HomePage() {
             </dl>
           </div>
 
-          {/* The product, on screen before you touch anything. */}
+          {/* The product, on screen before you touch anything — a skewed,
+              hover-reactive stack of toasts. */}
           <div
-            className="animate-rise-in min-w-0"
+            className="animate-rise-in relative min-w-0"
             style={{ animationDelay: "0.3s" }}
           >
-            <HeroToasts />
+            <div
+              aria-hidden
+              className="absolute left-1/2 top-1/2 -z-10 h-64 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ember/15 blur-[100px]"
+            />
+            <div className="flex items-center justify-center overflow-hidden py-8 lg:justify-end lg:overflow-visible">
+              <div className="scale-[0.64] sm:scale-90 lg:scale-100">
+                <DisplayCards />
+              </div>
+            </div>
           </div>
         </section>
 
