@@ -2,19 +2,20 @@ import Link from "next/link";
 import { Playground } from "@/components/playground";
 import { CodeBlock } from "@/components/code-block";
 import { CopyButton } from "@/components/copy-button";
-import { HeroMock } from "@/components/hero-mock";
+import { HeroToastStack } from "@/components/hero-toast-stack";
 
 /**
- * Home — clean light product page. Everything floats in one white rounded panel on
- * a soft grey field: a plain nav, a descriptive hero with a real toast mockup, a
- * live "configure it" section (the playground), install, footer. Calm and roomy.
+ * Home — clean, full-width light product page. No floating panel: nav and sections
+ * span edge to edge, content held to a centered max width. The hero shows real
+ * embertoast toasts in a skewed display-cards stack; the configurator fires the
+ * live library. Geist throughout, ember accent.
  */
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-base px-3 py-3 sm:px-5 sm:py-5">
-      <div className="mx-auto max-w-[1180px] overflow-hidden rounded-[26px] border border-rule bg-paper shadow-[0_1px_2px_rgba(20,20,30,0.05),0_36px_64px_-44px_rgba(20,20,30,0.28)]">
-        {/* ───────────── NAV ───────────── */}
-        <header className="flex items-center justify-between gap-4 px-6 py-5 sm:px-10">
+    <>
+      {/* ───────────── NAV ───────────── */}
+      <header className="border-b border-rule">
+        <div className="mx-auto flex max-w-[1120px] items-center justify-between gap-4 px-6 py-4 sm:px-8">
           <Link href="/" className="flex items-center gap-2.5 no-underline">
             <Logo />
             <span className="text-[15px] font-semibold tracking-tight text-ink">embertoast</span>
@@ -31,10 +32,12 @@ export default function HomePage() {
           >
             <span aria-hidden>★</span> Give a Star
           </a>
-        </header>
+        </div>
+      </header>
 
-        {/* ───────────── HERO ───────────── */}
-        <section className="grid grid-cols-1 items-center gap-14 px-6 pb-16 pt-4 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:pb-24 lg:pt-10">
+      {/* ───────────── HERO ───────────── */}
+      <section className="px-6 py-16 sm:px-8 lg:py-24">
+        <div className="mx-auto grid max-w-[1120px] grid-cols-1 items-center gap-14 lg:grid-cols-[1.02fr_0.98fr] lg:gap-12">
           <div className="min-w-0">
             <span className="animate-rise-in inline-flex items-center gap-2 rounded-full border border-rule bg-surface px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
               <span className="h-1.5 w-1.5 rounded-full bg-ember" /> 0 deps · &lt;5KB gzip · zero-config
@@ -85,15 +88,18 @@ export default function HomePage() {
           </div>
 
           <div className="animate-rise-in min-w-0" style={{ animationDelay: "0.22s" }}>
-            <HeroMock />
+            <div className="flex justify-center overflow-hidden py-4 lg:justify-end lg:overflow-visible lg:py-0">
+              <div className="origin-center scale-[0.72] sm:scale-90 lg:scale-100">
+                <HeroToastStack />
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ───────────── CONFIGURE ───────────── */}
-        <section
-          id="configure"
-          className="border-t border-rule bg-surface/50 px-6 py-16 sm:px-10 lg:py-20"
-        >
+      {/* ───────────── CONFIGURE (full-width band) ───────────── */}
+      <section id="configure" className="border-y border-rule bg-surface px-6 py-16 sm:px-8 lg:py-24">
+        <div className="mx-auto max-w-[1120px]">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ember">live · dogfooded</p>
           <h2 className="mt-3 max-w-xl text-h1 text-ink">
             Configure it live. The buttons fire the real thing.
@@ -125,10 +131,12 @@ export function App() {
 }`}
             />
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ───────────── WHY ───────────── */}
-        <section className="grid grid-cols-1 gap-x-10 gap-y-10 px-6 py-16 sm:px-10 md:grid-cols-3 lg:py-20">
+      {/* ───────────── WHY ───────────── */}
+      <section className="px-6 py-16 sm:px-8 lg:py-20">
+        <div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-x-10 gap-y-10 md:grid-cols-3">
           <Feature title="One function, anywhere">
             <code className="font-mono text-ink">toast()</code> is a store, not a hook —
             call it in a handler, a util, or any non-React module. One{" "}
@@ -142,10 +150,12 @@ export function App() {
             <code className="font-mono text-ink">aria-live</code> done right, never
             steals focus, honors reduced-motion. Zero deps, under 5KB min+gzip.
           </Feature>
-        </section>
+        </div>
+      </section>
 
-        {/* ───────────── INSTALL ───────────── */}
-        <section className="grid grid-cols-1 gap-10 border-t border-rule px-6 py-16 sm:px-10 md:grid-cols-[0.85fr_1.15fr] md:items-center lg:py-20">
+      {/* ───────────── INSTALL ───────────── */}
+      <section className="border-t border-rule px-6 py-16 sm:px-8 lg:py-20">
+        <div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-10 md:grid-cols-[0.85fr_1.15fr] md:items-center">
           <div className="min-w-0">
             <h2 className="text-h1 text-ink">Install in seconds.</h2>
             <p className="mt-4 max-w-prose text-muted">
@@ -160,19 +170,21 @@ export function App() {
 # or
 pnpm add @embertoast/react`}
           />
-        </section>
+        </div>
+      </section>
 
-        {/* ───────────── FOOTER ───────────── */}
-        <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-rule px-6 py-8 font-mono text-xs text-muted sm:px-10">
+      {/* ───────────── FOOTER ───────────── */}
+      <footer className="border-t border-rule px-6 py-8 sm:px-8">
+        <div className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-between gap-4 font-mono text-xs text-muted">
           <span>embertoast · MIT · Zana Salimi</span>
           <nav className="flex gap-6">
             <a className="no-underline hover:text-ink" href="https://github.com/zanasalimi/embertoast">GitHub</a>
             <a className="no-underline hover:text-ink" href="https://www.npmjs.com/package/@embertoast/react">npm</a>
             <a className="no-underline hover:text-ink" href="/llms.txt">llms.txt</a>
           </nav>
-        </footer>
-      </div>
-    </div>
+        </div>
+      </footer>
+    </>
   );
 }
 

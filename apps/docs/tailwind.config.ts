@@ -14,9 +14,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        base: "#ECECEF", // the soft grey field the panel floats on
-        paper: "#FFFFFF", // panels + cards
-        surface: "#F4F4F6", // subtle grey for chips, inputs, controls
+        base: "#FFFFFF", // full-width white page
+        paper: "#FFFFFF", // cards
+        surface: "#F5F5F7", // subtle grey for section bands, chips, controls
         ink: "#15151A", // near-black text
         muted: "#6B6B74",
         faint: "#9C9CA4",
