@@ -41,6 +41,8 @@ export type StaticToastContent = {} | null | undefined;
 export interface ToastAction {
   label: string;
   onClick: () => void;
+  /** Underlined text link (the default) or a filled button (e.g. an "Undo"). */
+  variant?: "link" | "button";
 }
 
 /** Per-toast options accepted by every facade method. */
@@ -53,6 +55,18 @@ export interface ToastOptions {
   /** Whether the toast can be dismissed by user gesture (swipe/click/close). */
   dismissible?: boolean;
   action?: ToastAction;
+  /** Bold heading rendered above the body. */
+  title?: ToastContent;
+  /** De-emphasized line under the body. A number is treated as epoch-ms and formatted by the renderer; a string is shown verbatim. */
+  timestamp?: number | string;
+  /** Action row. Renders middot-separated links, or a filled button per `variant`. Takes precedence over `action`. */
+  actions?: ToastAction[];
+  /** Small muted hint line beneath the actions (e.g. "This message will close in 4 seconds. Click to stop."). */
+  footer?: ToastContent;
+  /** Determinate progress in [0,1]. Renders a filled bar at the bottom edge (e.g. an upload). Patch it with `toast.update(id, { progress })`. */
+  progress?: number;
+  /** Render the auto-dismiss countdown as a depleting bar at the bottom edge. Ignored when `progress` is set or `duration` is Infinity. */
+  timerBar?: boolean;
   className?: string;
   /** Override the announcement politeness. Defaults follow severity. */
   ariaLive?: AriaLive;
