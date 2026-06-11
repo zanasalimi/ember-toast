@@ -16,15 +16,13 @@ export default function HomePage() {
       {/* ───────────── NAV ───────────── */}
       <header className="border-b border-rule">
         <div className="mx-auto flex max-w-[1120px] items-center justify-between gap-4 px-6 py-4 sm:px-8">
-          <Link href="/" className="flex items-center gap-2.5 no-underline">
-            <Logo />
-            <span className="text-[15px] font-semibold tracking-tight text-ink">embertoast</span>
+          <Link href="/" className="no-underline">
+            <span className="text-2xl font-bold tracking-tight text-ink">embertoast</span>
           </Link>
           <nav className="hidden items-center gap-8 text-sm text-muted md:flex">
             <a className="no-underline transition hover:text-ink" href="https://github.com/zanasalimi/embertoast">GitHub</a>
             <a className="no-underline transition hover:text-ink" href="https://www.npmjs.com/package/@embertoast/react">npm</a>
             <a className="no-underline transition hover:text-ink" href="#configure">Configure</a>
-            <a className="no-underline transition hover:text-ink" href="/llms.txt">llms.txt</a>
           </nav>
           <a
             href="https://github.com/zanasalimi/embertoast"
@@ -65,14 +63,8 @@ export default function HomePage() {
               style={{ animationDelay: "0.19s" }}
             >
               <a
-                href="#configure"
-                className="inline-flex items-center gap-2 rounded-full bg-ember px-5 py-2.5 text-sm font-medium text-white no-underline shadow-[0_8px_20px_-10px_rgba(232,89,12,0.8)] transition hover:bg-ember-deep"
-              >
-                Configure it live
-              </a>
-              <a
                 href="https://github.com/zanasalimi/embertoast"
-                className="inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-5 py-2.5 text-sm font-medium text-ink no-underline transition hover:border-ink/25"
+                className="inline-flex items-center gap-2 rounded-full bg-ember px-5 py-2.5 text-sm font-medium text-white no-underline shadow-[0_8px_20px_-10px_rgba(232,89,12,0.8)] transition hover:bg-ember-deep"
               >
                 View source <span aria-hidden>↗</span>
               </a>
@@ -176,22 +168,10 @@ pnpm add @embertoast/react`}
           <nav className="flex gap-6">
             <a className="no-underline hover:text-ink" href="https://github.com/zanasalimi/embertoast">GitHub</a>
             <a className="no-underline hover:text-ink" href="https://www.npmjs.com/package/@embertoast/react">npm</a>
-            <a className="no-underline hover:text-ink" href="/llms.txt">llms.txt</a>
           </nav>
         </div>
       </footer>
     </>
-  );
-}
-
-function Logo() {
-  return (
-    <span className="flex size-7 items-center justify-center rounded-lg bg-ember text-white shadow-[0_4px_10px_-4px_rgba(232,89,12,0.7)]">
-      <svg viewBox="0 0 20 20" width="14" height="14" fill="none" aria-hidden>
-        <rect x="3" y="6" width="14" height="9" rx="2.5" fill="#fff" />
-        <path d="M6.5 10.2l2 2 5-5.2" stroke="#E8590C" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </span>
   );
 }
 
