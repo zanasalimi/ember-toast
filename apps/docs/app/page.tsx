@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <main className="mx-auto max-w-editorial px-6 py-14 md:py-20">
       {/* Masthead — editorial, asymmetric. The playground is the right column. */}
-      <header className="grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:items-center">
+      <header className="grid grid-cols-1 gap-10 md:grid-cols-[1.05fr_0.95fr] md:items-center">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">
             React · headless · zero-dep
@@ -44,7 +44,7 @@ export default function HomePage() {
       <hr className="my-16 border-rule" />
 
       {/* The API, shown not told — the README leads with capability, so does this. */}
-      <section className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
+      <section className="grid grid-cols-1 gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
         <div>
           <h2 className="text-h1 text-ink">The whole API is a function.</h2>
           <p className="mt-4 max-w-prose text-muted">
@@ -72,7 +72,7 @@ export default function App() {
         />
       </section>
 
-      <div className="mt-12 grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
+      <div className="mt-12 grid grid-cols-1 gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
         <div>
           <h2 className="text-h1 text-ink">One toast, three states.</h2>
           <p className="mt-4 max-w-prose text-muted">
@@ -99,7 +99,7 @@ await toast.promise(save(), { loading: "Saving…", success: "Saved", error: "No
       <hr className="my-16 border-rule" />
 
       {/* Three intentional capability notes — prose, not an emoji grid. */}
-      <section className="grid gap-10 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-10 md:grid-cols-3">
         <Capability title="FLIP reflow">
           Remove a toast from the middle of a stack and the survivors{" "}
           <em>slide</em> into the freed space instead of jumping — measured First
@@ -124,7 +124,7 @@ await toast.promise(save(), { loading: "Saving…", success: "Saved", error: "No
       <hr className="my-16 border-rule" />
 
       {/* Install + footer. */}
-      <section className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
+      <section className="grid grid-cols-1 gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
         <div>
           <h2 className="text-h1 text-ink">Install</h2>
           <p className="mt-4 max-w-prose text-muted">
