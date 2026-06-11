@@ -1,5 +1,5 @@
-# syntax=docker/dockerfile:1
 # apps/docs/Dockerfile — multi-stage, monorepo-aware (pnpm + turbo)
+# (BuildKit's built-in frontend supports RUN --mount; no syntax directive needed.)
 FROM node:24-alpine AS build
 WORKDIR /repo
 RUN corepack enable
